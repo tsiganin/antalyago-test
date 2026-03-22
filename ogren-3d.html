@@ -292,16 +292,14 @@
         /* ── TAHTA KARTI ── */
         .board-card {
             aspect-ratio: 1; max-height: 100%; flex-shrink: 0;
-            background: var(--glass-dark);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border);
-            border-top-color: var(--border-top);
+            background: #1a1008;
+            border: 1px solid rgba(200,150,40,.2);
+            border-top-color: rgba(220,170,60,.35);
             border-radius: var(--r);
             box-shadow:
                 var(--sh2),
-                inset 0 1px 0 var(--nm-light),
-                inset 0 -1px 0 var(--nm-shadow);
+                0 0 0 4px rgba(0,0,0,.08),
+                inset 0 1px 0 rgba(220,170,60,.15);
             display: flex; align-items: center; justify-content: center;
             padding: 14px; overflow: hidden; position: relative;
             transition: box-shadow .3s, transform .3s;
@@ -309,23 +307,8 @@
         .board-card:hover {
             box-shadow:
                 var(--sh3),
-                0 0 40px rgba(77,155,116,.12),
-                inset 0 1px 0 var(--nm-light);
-        }
-
-        /* Üst parlak kenar */
-        .board-card::before {
-            content: '';
-            position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
-        }
-
-        /* Jade glow iç yansıma */
-        .board-card::after {
-            content: '';
-            position: absolute; inset: 0; border-radius: var(--r);
-            background: radial-gradient(ellipse 55% 45% at 70% 30%, rgba(77,155,116,.08) 0%, transparent 65%);
-            pointer-events: none;
+                0 0 40px rgba(190,140,30,.12),
+                inset 0 1px 0 rgba(220,170,60,.15);
         }
 
         #goban { max-width: 100%; max-height: 100%; display: block; touch-action: none; position: relative; z-index: 1; }

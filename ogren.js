@@ -169,45 +169,86 @@ function initCanvas(sz){
 function drawBoard(){
   const cv=document.getElementById('goban'),ctx=cv.getContext('2d');
   const s=cv.width,{m,st}=met(s,boardSize);
-  ctx.fillStyle='#dcb468';ctx.fillRect(0,0,s,s);
-  const g=ctx.createLinearGradient(0,0,s,s);
-  g.addColorStop(0,'rgba(255,220,120,.18)');g.addColorStop(1,'rgba(140,80,0,.10)');
-  ctx.fillStyle=g;ctx.fillRect(0,0,s,s);
-  ctx.strokeStyle='#7a5010';ctx.lineWidth=1;
-  for(let i=0;i<boardSize;i++){const px=m+i*st,py=m+i*st;ctx.beginPath();ctx.moveTo(px,m);ctx.lineTo(px,m+(boardSize-1)*st);ctx.stroke();ctx.beginPath();ctx.moveTo(m,py);ctx.lineTo(m+(boardSize-1)*st,py);ctx.stroke();}
-  ctx.fillStyle='#7a5010';
-  for(const[sx,sy]of stars(boardSize)){ctx.beginPath();ctx.arc(m+sx*st,m+sy*st,st*.09,0,Math.PI*2);ctx.fill();}
-  ctx.font=`${Math.max(8,st*.28)}px 'JetBrains Mono',monospace`;ctx.fillStyle='#7a5010';ctx.textAlign='center';ctx.textBaseline='middle';
-  for(let i=0;i<boardSize;i++){const px=m+i*st;ctx.fillText(LTRS[i],px,m*.38);ctx.fillText(LTRS[i],px,s-m*.38);ctx.fillText(String(boardSize-i),m*.38,m+i*st);ctx.fillText(String(boardSize-i),s-m*.38,m+i*st);}
-  for(let y=0;y<boardSize;y++)for(let x=0;x<boardSize;x++)if(boardGrid[y][x])drawStone(ctx,m+x*st,m+y*st,st*.46,boardGrid[y][x]);
 
-  // Nefes noktası işaretleri (kırmızı çarpı)
-  const step = window._curStep||CUR_LESSON?.steps[CUR_STEP];
+  // ── Zemin: ekran görüntüsüne uygun koyu kahverengi ──
+  const base=ctx.createRadialGradient(s*.5,s*.45,s*.05,s*.5,s*.5,s*.78);
+  base.addColorStop(0,'#3a2a12');
+  base.addColorStop(0.45,'#2a1e0c');
+  base.addColorStop(1,'#181008');
+  ctx.fillStyle=base;ctx.fillRect(0,0,s,s);
+
+  // Çok ince tahta doku — neredeyse görünmez yatay damarlar
+  for(let i=0;i<14;i++){
+    const y0=(s/14)*i+Math.random()*8;
+    ctx.beginPath();ctx.moveTo(0,y0);
+    for(let x=0;x<=s;x+=6){ctx.lineTo(x,y0+Math.sin(x*.009+i*.7)*st*.08);}
+    ctx.strokeStyle=`rgba(180,120,20,${0.025+Math.random()*0.02})`;
+    ctx.lineWidth=0.5+Math.random()*.8;ctx.stroke();
+  }
+
+  // ── Izgara çizgileri — altın sarısı ──
+  ctx.strokeStyle='rgba(200,140,30,.75)';ctx.lineWidth=.85;
+  for(let i=0;i<boardSize;i++){
+    const px=m+i*st,py=m+i*st;
+    ctx.beginPath();ctx.moveTo(px,m);ctx.lineTo(px,m+(boardSize-1)*st);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(m,py);ctx.lineTo(m+(boardSize-1)*st,py);ctx.stroke();
+  }
+
+  // ── Hoshi noktaları — altın sarısı dolgu ──
+  ctx.fillStyle='rgba(210,155,35,.85)';
+  for(const[sx,sy]of stars(boardSize)){
+    ctx.beginPath();ctx.arc(m+sx*st,m+sy*st,st*.1,0,Math.PI*2);ctx.fill();
+  }
+
+  // ── Koordinat harfleri & sayılar — soluk altın ──
+  const fs=Math.max(8,st*.27);
+  ctx.font=`500 ${fs}px 'JetBrains Mono',monospace`;
+  ctx.fillStyle='rgba(190,135,30,.6)';ctx.textAlign='center';ctx.textBaseline='middle';
+  for(let i=0;i<boardSize;i++){
+    const px=m+i*st;
+    ctx.fillText(LTRS[i],px,m*.42);
+    ctx.fillText(LTRS[i],px,s-m*.42);
+    ctx.fillText(String(boardSize-i),m*.42,m+i*st);
+    ctx.fillText(String(boardSize-i),s-m*.42,m+i*st);
+  }
+
+  // ── Taşlar ──
+  for(let y=0;y<boardSize;y++)
+    for(let x=0;x<boardSize;x++)
+      if(boardGrid[y][x]) drawStone(ctx,m+x*st,m+y*st,st*.46,boardGrid[y][x]);
+
+  // ── Nefes noktası işaretleri — altın sarısı daire ──
+  const step=window._curStep||CUR_LESSON?.steps[CUR_STEP];
   if(step?.markers){
     step.markers.forEach(mk=>{
-      if(!inB(mk.x,mk.y,boardSize)) return;
-      const cx=m+mk.x*st, cy=m+mk.y*st;
-      const r=st*.22;
+      if(!inB(mk.x,mk.y,boardSize))return;
+      const cx=m+mk.x*st,cy=m+mk.y*st,r=st*.2;
       ctx.save();
-      ctx.strokeStyle='#e03030';
-      ctx.lineWidth=st*.08;
-      ctx.lineCap='round';
-      // Çarpı çizgisi 1
-      ctx.beginPath(); ctx.moveTo(cx-r,cy-r); ctx.lineTo(cx+r,cy+r); ctx.stroke();
-      // Çarpı çizgisi 2
-      ctx.beginPath(); ctx.moveTo(cx+r,cy-r); ctx.lineTo(cx-r,cy+r); ctx.stroke();
+      const mg=ctx.createRadialGradient(cx-r*.2,cy-r*.2,0,cx,cy,r);
+      mg.addColorStop(0,'rgba(255,210,80,.95)');
+      mg.addColorStop(1,'rgba(190,135,30,.55)');
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.fillStyle=mg;ctx.fill();
+      ctx.strokeStyle='rgba(150,100,15,.7)';ctx.lineWidth=st*.04;ctx.stroke();
+      ctx.beginPath();ctx.arc(cx-r*.28,cy-r*.3,r*.2,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,248,200,.55)';ctx.fill();
       ctx.restore();
     });
   }
-  // Yasak nokta işaretleri (kırmızı daire + çarpı)
+
+  // ── Yasak nokta işaretleri (kırmızı X kalkanı) ──
   if(step?.forbidden){
     step.forbidden.forEach(mk=>{
       if(!inB(mk.x,mk.y,boardSize))return;
-      const cx=m+mk.x*st,cy=m+mk.y*st,r=st*.20;
+      const cx=m+mk.x*st,cy=m+mk.y*st,r=st*.22;
       ctx.save();
-      ctx.strokeStyle='#c0392b';ctx.lineWidth=st*.09;ctx.lineCap='round';
-      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
-      const d=r*.65;ctx.lineWidth=st*.065;
+      // Arka dolgu
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.fillStyle='rgba(200,40,30,.18)';ctx.fill();
+      ctx.strokeStyle='rgba(200,50,40,.85)';ctx.lineWidth=st*.07;ctx.stroke();
+      // Çarpı
+      const d=r*.62;ctx.lineWidth=st*.1;ctx.lineCap='round';
+      ctx.strokeStyle='rgba(220,60,50,.95)';
       ctx.beginPath();ctx.moveTo(cx-d,cy-d);ctx.lineTo(cx+d,cy+d);ctx.stroke();
       ctx.beginPath();ctx.moveTo(cx+d,cy-d);ctx.lineTo(cx-d,cy+d);ctx.stroke();
       ctx.restore();
@@ -216,11 +257,64 @@ function drawBoard(){
 }
 
 function drawStone(ctx,cx,cy,r,col){
+  const isBlack=col==='black'||col==='B';
   ctx.save();
-  if(col==='black'||col==='B'){const g=ctx.createRadialGradient(cx-r*.3,cy-r*.3,r*.05,cx,cy,r);g.addColorStop(0,'#555');g.addColorStop(1,'#111');ctx.fillStyle=g;ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=4;ctx.shadowOffsetX=2;ctx.shadowOffsetY=2;}
-  else{const g=ctx.createRadialGradient(cx-r*.3,cy-r*.3,r*.05,cx,cy,r);g.addColorStop(0,'#fff');g.addColorStop(1,'#ccc');ctx.fillStyle=g;ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=3;ctx.shadowOffsetX=1;ctx.shadowOffsetY=2;}
-  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
-  if(col==='white'||col==='W'){ctx.strokeStyle='#aaa';ctx.lineWidth=.5;ctx.stroke();}
+
+  // ── Zemine düşen gölge ──
+  ctx.shadowColor='rgba(0,0,0,.55)';
+  ctx.shadowBlur=r*.9;
+  ctx.shadowOffsetX=r*.28;
+  ctx.shadowOffsetY=r*.35;
+  ctx.beginPath();ctx.arc(cx,cy,r*.97,0,Math.PI*2);
+
+  if(isBlack){
+    // Siyah taş: derin obsidyen rengi + ince mavi yansıma
+    const g=ctx.createRadialGradient(cx-r*.32,cy-r*.36,r*.04,cx+r*.08,cy+r*.08,r*1.05);
+    g.addColorStop(0,'#6a6a7a');
+    g.addColorStop(0.25,'#2c2c38');
+    g.addColorStop(0.7,'#111118');
+    g.addColorStop(1,'#08080e');
+    ctx.fillStyle=g;
+  } else {
+    // Beyaz taş: porselen / inci beyazı
+    const g=ctx.createRadialGradient(cx-r*.3,cy-r*.34,r*.04,cx+r*.06,cy+r*.1,r*1.05);
+    g.addColorStop(0,'#ffffff');
+    g.addColorStop(0.3,'#f4f4f4');
+    g.addColorStop(0.75,'#d8d8d8');
+    g.addColorStop(1,'#b8b8b8');
+    ctx.fillStyle=g;
+  }
+  ctx.fill();
+
+  // ── Taş kenar çizgisi ──
+  ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
+  ctx.beginPath();ctx.arc(cx,cy,r*.97,0,Math.PI*2);
+  ctx.strokeStyle=isBlack?'rgba(0,0,0,.7)':'rgba(160,160,160,.6)';
+  ctx.lineWidth=r*.06;ctx.stroke();
+
+  // ── Ana specular highlight (parlak tepe) ──
+  const hl=ctx.createRadialGradient(cx-r*.3,cy-r*.35,0,cx-r*.18,cy-r*.22,r*.62);
+  hl.addColorStop(0,isBlack?'rgba(255,255,255,.42)':'rgba(255,255,255,.82)');
+  hl.addColorStop(0.5,isBlack?'rgba(255,255,255,.1)':'rgba(255,255,255,.28)');
+  hl.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.beginPath();ctx.arc(cx,cy,r*.97,0,Math.PI*2);
+  ctx.fillStyle=hl;ctx.fill();
+
+  // ── Küçük parlak nokta (speküler) ──
+  const sp=ctx.createRadialGradient(cx-r*.32,cy-r*.37,0,cx-r*.3,cy-r*.35,r*.28);
+  sp.addColorStop(0,isBlack?'rgba(255,255,255,.55)':'rgba(255,255,255,.95)');
+  sp.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.beginPath();ctx.arc(cx-r*.3,cy-r*.36,r*.28,0,Math.PI*2);
+  ctx.fillStyle=sp;ctx.fill();
+
+  // ── Alt kenar karartma (derinlik) ──
+  const bot=ctx.createRadialGradient(cx+r*.2,cy+r*.3,r*.1,cx,cy,r);
+  bot.addColorStop(0,isBlack?'rgba(0,0,0,.5)':'rgba(0,0,0,.18)');
+  bot.addColorStop(0.6,'rgba(0,0,0,0)');
+  bot.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();ctx.arc(cx,cy,r*.97,0,Math.PI*2);
+  ctx.fillStyle=bot;ctx.fill();
+
   ctx.restore();
 }
 
