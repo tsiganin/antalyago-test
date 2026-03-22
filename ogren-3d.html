@@ -7,47 +7,58 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* ── Koyu zemin ── */
-            --bg:           #0f1210;
-            --bg2:          #141816;
-            --bg3:          #1a1f1c;
-            --bg4:          #1f2520;
+            /* ── Açık zemin ── */
+            --bg:           #d8d8d4;
+            --bg2:          #cececa;
+            --bg3:          #c8c8c4;
+            --bg4:          #c0c0bc;
 
             /* ── Jade / yeşil aksan ── */
-            --jade:         #3d7a5c;
-            --jade-mid:     #4e9b74;
-            --jade-bright:  #5dba8a;
-            --jade-glow:    rgba(77,155,116,.35);
-            --jade-glass:   rgba(77,155,116,.12);
-            --jade-frost:   rgba(77,155,116,.18);
+            --jade:         #2d6647;
+            --jade-mid:     #3a8560;
+            --jade-bright:  #48a076;
+            --jade-glow:    rgba(45,102,71,.25);
+            --jade-glass:   rgba(45,102,71,.1);
+            --jade-frost:   rgba(45,102,71,.14);
 
             /* ── Glassmorphic yüzeyler ── */
-            --glass-dark:   rgba(20,24,22,.72);
-            --glass-mid:    rgba(26,31,28,.65);
-            --glass-light:  rgba(35,42,38,.55);
+            --glass-dark:   rgba(220,220,216,.78);
+            --glass-mid:    rgba(215,215,210,.72);
+            --glass-light:  rgba(210,210,205,.65);
 
             /* ── Neumorphic ışık/gölge ── */
-            --nm-light:     rgba(255,255,255,.045);
-            --nm-shadow:    rgba(0,0,0,.55);
-            --nm-inset-l:   rgba(255,255,255,.06);
-            --nm-inset-s:   rgba(0,0,0,.4);
+            --nm-light:     rgba(255,255,255,.7);
+            --nm-shadow:    rgba(0,0,0,.15);
+            --nm-inset-l:   rgba(255,255,255,.6);
+            --nm-inset-s:   rgba(0,0,0,.12);
+
+            /* ── Neumorphic kutular ── */
+            --nm-box:
+                4px 4px 10px rgba(0,0,0,.18),
+               -3px -3px 8px rgba(255,255,255,.75);
+            --nm-inset:
+                inset 3px 3px 7px rgba(0,0,0,.14),
+                inset -2px -2px 5px rgba(255,255,255,.7);
+            --nm-press:
+                inset 4px 4px 9px rgba(0,0,0,.18),
+                inset -2px -2px 5px rgba(255,255,255,.65);
 
             /* ── Metin ── */
-            --text:         #e8ede9;
-            --text2:        #9aab9d;
-            --text3:        #596459;
-            --text-accent:  #6fd49a;
+            --text:         #1a2018;
+            --text2:        #3d4a3a;
+            --text3:        #7a8a76;
+            --text-accent:  #2d7a50;
 
             /* ── Kenarlık ── */
-            --border:       rgba(255,255,255,.06);
-            --border-jade:  rgba(77,155,116,.25);
-            --border-top:   rgba(255,255,255,.1);
+            --border:       rgba(0,0,0,.1);
+            --border-jade:  rgba(45,122,80,.3);
+            --border-top:   rgba(255,255,255,.8);
 
             /* ── Gölgeler ── */
-            --sh1:  0 2px 8px rgba(0,0,0,.4);
-            --sh2:  0 8px 28px rgba(0,0,0,.5);
-            --sh3:  0 20px 60px rgba(0,0,0,.6);
-            --sh-jade: 0 6px 24px rgba(77,155,116,.22);
+            --sh1:  0 2px 8px rgba(0,0,0,.12);
+            --sh2:  0 8px 28px rgba(0,0,0,.14);
+            --sh3:  0 20px 60px rgba(0,0,0,.2);
+            --sh-jade: 0 6px 24px rgba(45,122,80,.2);
 
             /* ── Blur ── */
             --blur:  blur(24px);
@@ -58,18 +69,6 @@
             --r2: 12px;
             --r3: 30px;
 
-            /* ── Neumorphic kutular ── */
-            --nm-box:
-                6px 6px 14px rgba(0,0,0,.55),
-               -4px -4px 10px rgba(255,255,255,.04);
-            --nm-inset:
-                inset 3px 3px 8px rgba(0,0,0,.5),
-                inset -2px -2px 6px rgba(255,255,255,.04);
-            --nm-press:
-                inset 4px 4px 10px rgba(0,0,0,.6),
-                inset -2px -2px 5px rgba(255,255,255,.03);
-        }
-
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         html, body {
@@ -79,14 +78,14 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ── Derin zemin gradyanı ── */
+        /* ── Zemin gradyanı ── */
         body::before {
             content: '';
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background:
-                radial-gradient(ellipse 65% 55% at 80% 10%, rgba(61,122,92,.14) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 40% at 10% 90%, rgba(61,122,92,.09) 0%, transparent 55%),
-                radial-gradient(ellipse 35% 30% at 50% 50%, rgba(77,155,116,.06) 0%, transparent 60%);
+                radial-gradient(ellipse 65% 55% at 80% 10%, rgba(61,122,92,.09) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 10% 90%, rgba(61,122,92,.06) 0%, transparent 55%),
+                radial-gradient(ellipse 35% 30% at 50% 50%, rgba(200,200,190,.3) 0%, transparent 60%);
         }
 
         /* ── Goban çizgileri ── */
@@ -94,8 +93,8 @@
             content: '';
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background-image:
-                linear-gradient(rgba(77,155,116,.028) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(77,155,116,.028) 1px, transparent 1px);
+                linear-gradient(rgba(100,110,100,.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(100,110,100,.06) 1px, transparent 1px);
             background-size: 40px 40px;
         }
 
