@@ -1,0 +1,26 @@
+{
+  "adim": 1,
+  "aciklama": "4 farklı bölgede yasak nokta — tüm tahtayı tara",
+  "board": [
+    {"color": "W", "x": 4, "y": 0},
+    {"color": "W", "x": 6, "y": 0},
+    {"color": "W", "x": 4, "y": 1},
+    {"color": "W", "x": 5, "y": 1},
+    {"color": "W", "x": 6, "y": 1},
+    {"color": "W", "x": 0, "y": 3},
+    {"color": "W", "x": 1, "y": 4},
+    {"color": "W", "x": 4, "y": 4},
+    {"color": "W", "x": 0, "y": 5},
+    {"color": "W", "x": 3, "y": 5},
+    {"color": "W", "x": 5, "y": 5},
+    {"color": "W", "x": 4, "y": 6},
+    {"color": "W", "x": 8, "y": 7},
+    {"color": "W", "x": 7, "y": 8}
+  ],
+  "forbidden": [
+    {"x": 5, "y": 0},
+    {"x": 0, "y": 4},
+    {"x": 4, "y": 5},
+    {"x": 8, "y": 8}
+  ]
+}

@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oyna – Go Odaları</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Noto+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  Firebase Go Oda Sistemi                                         ║
+  ║                                                                  ║
+  ║  KURULUM (5 adım):                                               ║
+  ║  1. console.firebase.google.com → Yeni Proje                     ║
+  ║  2. Authentication → Sign-in method → Google'ı etkinleştir       ║
+  ║  3. Realtime Database → Oluştur → Test mode (başlangıç için)     ║
+  ║  4. Proje Ayarları → Web uygulaması ekle → firebaseConfig al     ║
+  ║  5. Aşağıdaki FIREBASE_CONFIG nesnesini kendi değerlerinle doldur║
+  ║                                                                  ║
+  ║  REALTIME DB KURALI (Database Rules):                            ║
+  ║  {                                                               ║
+  ║    "rules": {                                                     ║
+  ║      "rooms": {                                                   ║
+  ║        ".read": true,                                            ║
+  ║        "$roomId": { ".write": "auth != null" }                   ║
+  ║      }                                                           ║
+  ║    }                                                             ║
+  ║  }                                                               ║
+  ╚══════════════════════════════════════════════════════════════════╝
+  -->
+
+  <!-- Firebase SDK (modular v10 compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --wood:        #d4a84b;
+      --wood-dark:   #b8861a;
+      --wood-light:  #f5e4a8;
+      --wood-board:  #dcb468;
+      --ink:         #1a1008;
+      --paper:       #fdf6e3;
+      --paper-dark:  #f0e6c8;
+      --panel:       #faf2dc;
+      --border:      #c9a840;
+      --shadow:      rgba(80,40,0,.18);
+      --green:       #27ae60;
+      --red:         #c0392b;
+      --blue:        #2471a3;
+      --orange:      #d35400;
+      --muted:       #9a7840;
+      --r:           3px;
+    }
+
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+    body {
+      min-height:100vh;
+      background:var(--paper);
+      background-image:
+        radial-gradient(ellipse at 10% 5%,  rgba(212,168,75,.13) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 95%, rgba(184,134,26,.10) 0%, transparent 50%);
+      font-family:'Noto Sans',sans-serif;
+      color:var(--ink);
+      display:flex; flex-direction:column;
+    }
+
+    /* ─── TOPBAR ─── */
+    .topbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:.7rem 1.5rem;
+      background:var(--paper-dark);
+      border-bottom:2px solid var(--border);
+      box-shadow:0 2px 8px var(--shadow);
+      flex-shrink:0;
+      animation:fadeDown .5s ease both;
+    }
+    .topbar-left { display:flex; align-items:center; gap:.75rem; }
+    .back-btn {
+      display:flex; align-items:center; gap:.3rem;
+      text-decoration:none; color:var(--muted);
+      font-size:.8rem; font-weight:600; letter-spacing:.05em;
+      padding:.28rem .65rem; border:1px solid var(--border); border-radius:var(--r);
+      transition:all .15s;
+    }
+    .back-btn:hover { background:var(--wood); color:var(--ink); }
+    .page-title { font-family:'Noto Serif',serif; font-size:1.12rem; font-weight:700; letter-spacing:.06em; }
+
+    /* user chip */
+    .user-chip {
+      display:flex; align-items:center; gap:.5rem;
+      font-size:.8rem; font-weight:600;
+    }
+    .user-avatar {
+      width:28px; height:28px; border-radius:50%;
+      border:2px solid var(--border);
+      object-fit:cover; background:var(--wood-light);
+      display:flex; align-items:center; justify-content:center;
+      font-size:.75rem; font-weight:700; color:var(--wood-dark);
+      overflow:hidden; flex-shrink:0;
+    }
+    .user-avatar img { width:100%; height:100%; object-fit:cover; }
+    .logout-btn {
+      font-size:.72rem; color:var(--muted); border:1px solid var(--border);
+      border-radius:var(--r); padding:.22rem .55rem; cursor:pointer;
+      background:transparent; transition:all .15s;
+    }
+    .logout-btn:hover { background:var(--red); color:#fff; border-color:var(--red); }
+
+    /* ─── SCREENS ─── */
+    .screen { display:none; flex:1; }
+    .screen.active { display:flex; }
+
+    /* ─── LOGIN SCREEN ─── */
+    #screen-login {
+      align-items:center; justify-content:center; flex-direction:column;
+      gap:2rem; padding:2rem;
+      animation:fadeUp .5s ease both;
+    }
+    .login-logo { font-family:'Noto Serif',serif; font-size:2.4rem; font-weight:700; letter-spacing:.08em; text-align:center; line-height:1.2; }
+    .login-tagline { font-size:.9rem; color:var(--muted); text-align:center; letter-spacing:.04em; }
+    .login-card {
+      background:var(--panel); border:2px solid var(--border);
+      border-radius:var(--r); box-shadow:5px 5px 0 var(--wood-dark);
+      padding:2rem 2.25rem; width:100%; max-width:380px;
+      display:flex; flex-direction:column; gap:1.25rem;
+    }
+    .login-card h2 { font-family:'Noto Serif',serif; font-size:1.2rem; font-weight:700; }
+    .login-card p  { font-size:.82rem; color:var(--muted); line-height:1.65; }
+    .google-btn {
+      display:flex; align-items:center; justify-content:center; gap:.75rem;
+      padding:.75rem 1.25rem; border:2px solid var(--border); border-radius:var(--r);
+      background:var(--paper); cursor:pointer; font-family:'Noto Sans',sans-serif;
+      font-size:.9rem; font-weight:600; color:var(--ink); transition:all .18s;
+      width:100%;
+    }
+    .google-btn:hover { background:var(--wood-light); border-color:var(--wood-dark); box-shadow:3px 3px 0 var(--wood-dark); }
+    .google-btn svg { width:20px; height:20px; flex-shrink:0; }
+
+    /* ─── LOBBY SCREEN ─── */
+    #screen-lobby {
+      flex-direction:column; max-width:1100px; width:100%;
+      margin:0 auto; padding:1.5rem; gap:1.25rem;
+      animation:fadeUp .4s ease both;
+    }
+
+    .lobby-header {
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem;
+    }
+    .lobby-title { font-family:'Noto Serif',serif; font-size:1.3rem; font-weight:700; }
+
+    /* ─── ROOMS GRID ─── */
+    .rooms-grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+      gap:1rem;
+    }
+
+    .room-card {
+      background:var(--panel); border:1.5px solid var(--border); border-radius:var(--r);
+      box-shadow:3px 3px 0 var(--wood-dark);
+      padding:1rem 1.1rem;
+      display:flex; flex-direction:column; gap:.7rem;
+      cursor:pointer; transition:all .15s;
+      position:relative;
+    }
+    .room-card:hover { transform:translate(-2px,-2px); box-shadow:5px 5px 0 var(--wood-dark); }
+    .room-card:active { transform:translate(1px,1px); box-shadow:1px 1px 0 var(--wood-dark); }
+    .delete-room-btn {
+      background:transparent; border:none; cursor:pointer;
+      font-size:.85rem; padding:.1rem .25rem; border-radius:3px;
+      transition:background .15s; line-height:1;
+    }
+    .delete-room-btn:hover { background:rgba(192,57,43,.15); }
+
+    .room-card-header { display:flex; align-items:center; justify-content:space-between; }
+    .room-name  { font-family:'Noto Serif',serif; font-size:1rem; font-weight:700; }
+    .room-badge {
+      font-size:.65rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+      padding:.18rem .55rem; border-radius:20px;
+    }
+    .room-badge.waiting  { background:var(--wood-light); color:var(--wood-dark); border:1px solid var(--wood); }
+    .room-badge.playing  { background:#e8f8f0; color:var(--green); border:1px solid var(--green); }
+    .room-badge.watching { background:#eaf2fb; color:var(--blue); border:1px solid var(--blue); }
+
+    .room-players {
+      display:flex; align-items:center; gap:.5rem;
+      font-size:.8rem; color:var(--muted);
+    }
+    .player-slot {
+      display:flex; align-items:center; gap:.35rem;
+      background:var(--paper); border:1px solid var(--border);
+      border-radius:var(--r); padding:.3rem .55rem;
+      flex:1;
+    }
+    .player-slot .ps-stone { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+    .ps-stone.b { background:radial-gradient(circle at 35% 30%,#555,#111); }
+    .ps-stone.w { background:radial-gradient(circle at 35% 30%,#fff,#ccc); border:1px solid #bbb; }
+    .player-slot .ps-name { font-size:.75rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .vs-sep { font-size:.7rem; color:var(--muted); flex-shrink:0; }
+
+    .room-meta { display:flex; gap:.5rem; flex-wrap:wrap; }
+    .room-tag {
+      font-size:.68rem; color:var(--muted);
+      background:var(--paper-dark); border-radius:2px;
+      padding:.1rem .4rem;
+    }
+
+    .room-spectators { font-size:.7rem; color:var(--muted); }
+
+    .empty-lobby {
+      grid-column:1/-1; text-align:center;
+      padding:3rem; color:var(--muted);
+      font-family:'Noto Serif',serif; font-size:1rem;
+    }
+
+    /* ─── YENI ODA MODAL ─── */
+    #modal-newroom {
+      display:none; position:fixed; inset:0;
+      background:rgba(26,16,8,.55);
+      align-items:center; justify-content:center;
+      z-index:500; padding:1rem;
+    }
+    #modal-newroom.show { display:flex; }
+    .modal-box {
+      background:var(--paper); border:2px solid var(--border);
+      border-radius:var(--r); box-shadow:6px 6px 0 var(--wood-dark);
+      padding:1.75rem 2rem; width:100%; max-width:360px;
+      display:flex; flex-direction:column; gap:1rem;
+    }
+    .modal-title { font-family:'Noto Serif',serif; font-size:1.2rem; font-weight:700; }
+    .modal-btns  { display:flex; gap:.6rem; margin-top:.25rem; }
+
+    /* ─── FORM ─── */
+    .fg { display:flex; flex-direction:column; gap:.32rem; }
+    .fl { font-size:.73rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; }
+    .fw { position:relative; }
+    .fw::after { content:'▾'; position:absolute; right:.6rem; top:50%; transform:translateY(-50%); color:var(--muted); pointer-events:none; font-size:.72rem; }
+    select, input[type=text] {
+      width:100%; background:var(--paper); border:1.5px solid var(--border);
+      border-radius:var(--r); color:var(--ink); font-family:'Noto Sans',sans-serif;
+      font-size:.84rem; padding:.4rem .65rem; outline:none;
+      appearance:none; transition:border-color .15s;
+    }
+    select:focus, input[type=text]:focus { border-color:var(--wood-dark); }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      padding:.52rem 1.1rem; border:1.5px solid var(--border); border-radius:var(--r);
+      background:var(--paper); font-family:'Noto Sans',sans-serif;
+      font-size:.82rem; font-weight:600; letter-spacing:.05em;
+      cursor:pointer; transition:all .15s; color:var(--ink); white-space:nowrap;
+    }
+    .btn.primary { background:var(--wood); border-color:var(--wood-dark); }
+    .btn.primary:hover { background:var(--wood-dark); color:#fff; }
+    .btn.danger  { border-color:var(--red); color:var(--red); }
+    .btn.danger:hover  { background:var(--red); color:#fff; }
+    .btn.ghost   { border-color:transparent; color:var(--muted); }
+    .btn.ghost:hover { background:var(--paper-dark); border-color:var(--border); }
+    .btn:disabled { opacity:.4; cursor:not-allowed; }
+    .btn.full { width:100%; }
+
+    /* ─── GAME SCREEN ─── */
+    #screen-game {
+      flex-direction:column; max-width:1200px; width:100%;
+      margin:0 auto; padding:1.25rem; gap:1.1rem;
+      animation:fadeUp .4s ease both;
+    }
+
+    .game-layout {
+      display:grid; grid-template-columns:200px 1fr 200px;
+      gap:1.1rem; flex:1;
+    }
+
+    /* ─── PANEL ─── */
+    .panel {
+      background:var(--panel); border:1.5px solid var(--border);
+      border-radius:var(--r); box-shadow:3px 3px 0 var(--wood-dark);
+      padding:.9rem; display:flex; flex-direction:column; gap:.85rem;
+    }
+    .panel-title {
+      font-family:'Noto Serif',serif; font-size:.8rem; font-weight:700;
+      text-transform:uppercase; letter-spacing:.12em; color:var(--wood-dark);
+      padding-bottom:.45rem; border-bottom:1px solid var(--border);
+    }
+
+    /* ─── PLAYER CARDS ─── */
+    .player-card {
+      background:var(--paper); border:1.5px solid var(--border); border-radius:var(--r);
+      padding:.6rem .75rem; display:flex; align-items:center; gap:.6rem;
+    }
+    .player-card.active-turn { border-color:var(--wood-dark); background:var(--wood-light); }
+    .pc-stone { width:16px; height:16px; border-radius:50%; flex-shrink:0; }
+    .pc-stone.black { background:radial-gradient(circle at 35% 30%,#555,#111); box-shadow:0 1px 3px rgba(0,0,0,.4); }
+    .pc-stone.white { background:radial-gradient(circle at 35% 30%,#fff,#ccc); border:1px solid #bbb; }
+    .pc-info { display:flex; flex-direction:column; min-width:0; }
+    .pc-name { font-size:.82rem; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .pc-sub  { font-size:.68rem; color:var(--muted); }
+    .pc-clock { margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:.88rem; font-weight:600; flex-shrink:0; }
+    .pc-clock.danger { color:var(--red); animation:blink 1s infinite; }
+
+    /* ─── BOARD ─── */
+    .board-col { display:flex; flex-direction:column; align-items:center; gap:.75rem; }
+    .board-container {
+      position:relative; width:100%; max-width:560px; aspect-ratio:1;
+      background:var(--wood-board); border:3px solid var(--wood-dark); border-radius:var(--r);
+      box-shadow:5px 5px 0 var(--wood-dark),0 8px 28px var(--shadow); overflow:hidden;
+    }
+    #goban { width:100%; height:100%; display:block; }
+
+    /* overlay */
+    .board-overlay {
+      display:none; position:absolute; inset:0;
+      background:rgba(253,246,227,.93);
+      flex-direction:column; align-items:center; justify-content:center;
+      gap:1rem; z-index:20; padding:2rem; text-align:center;
+    }
+    .board-overlay.show { display:flex; }
+    .ov-title { font-family:'Noto Serif',serif; font-size:1.7rem; font-weight:700; }
+    .ov-sub   { font-size:.88rem; color:var(--muted); max-width:260px; line-height:1.65; }
+
+    /* your-turn badge */
+    .turn-bar {
+      display:flex; align-items:center; gap:.65rem;
+      font-size:.84rem; font-weight:600; color:var(--muted);
+    }
+    .turn-stone { width:18px; height:18px; border-radius:50%; }
+    .turn-stone.black { background:radial-gradient(circle at 35% 30%,#555,#111); box-shadow:0 1px 3px rgba(0,0,0,.4); }
+    .turn-stone.white { background:radial-gradient(circle at 35% 30%,#fff,#ccc); border:1px solid #bbb; }
+    .your-turn-pill {
+      display:none; padding:.2rem .65rem; border-radius:20px;
+      background:var(--green); color:#fff;
+      font-size:.7rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+      animation:pulse-pill 1.6s infinite;
+    }
+    .your-turn-pill.show { display:inline-block; }
+    .spectator-pill {
+      padding:.2rem .65rem; border-radius:20px;
+      background:var(--blue); color:#fff;
+      font-size:.7rem; font-weight:700; letter-spacing:.07em;
+      display:none;
+    }
+    .spectator-pill.show { display:inline-block; }
+
+    .game-btns { display:flex; gap:.5rem; width:100%; max-width:560px; }
+    .game-btns .btn { flex:1; font-size:.75rem; padding:.45rem .5rem; }
+
+    /* ─── SHARE LINK ─── */
+    .share-box {
+      display:flex; gap:.4rem; align-items:center;
+      background:var(--paper); border:1px solid var(--border); border-radius:var(--r);
+      padding:.35rem .5rem; font-size:.72rem;
+    }
+    .share-box input {
+      flex:1; border:none; background:transparent; font-family:'JetBrains Mono',monospace;
+      font-size:.7rem; color:var(--muted); outline:none;
+    }
+    .copy-btn {
+      font-size:.68rem; padding:.2rem .5rem; font-weight:700;
+      background:var(--wood-light); border:1px solid var(--wood); border-radius:2px;
+      cursor:pointer; transition:all .15s; white-space:nowrap;
+    }
+    .copy-btn:hover { background:var(--wood); }
+
+    /* ─── CHAT ─── */
+    #chat-log {
+      flex:1; overflow-y:auto; max-height:200px;
+      background:var(--paper); border:1px solid var(--border); border-radius:var(--r);
+      padding:.5rem; display:flex; flex-direction:column; gap:.2rem;
+      font-size:.73rem;
+    }
+    .cm { line-height:1.55; }
+    .cm .cu { font-weight:700; color:var(--wood-dark); }
+    .cm .cs { color:var(--muted); font-style:italic; }
+
+    .chat-input-row { display:flex; gap:.4rem; }
+    .chat-input-row input {
+      flex:1; font-family:'Noto Sans',sans-serif;
+      font-size:.78rem; padding:.35rem .55rem;
+    }
+    .chat-input-row button {
+      padding:.3rem .65rem; font-size:.72rem; font-weight:600;
+      background:var(--wood); border:1.5px solid var(--wood-dark);
+      border-radius:var(--r); cursor:pointer; transition:all .15s;
+    }
+    .chat-input-row button:hover { background:var(--wood-dark); color:#fff; }
+
+    /* ─── MOVE LIST ─── */
+    #move-list {
+      overflow-y:auto; max-height:180px;
+      background:var(--paper); border:1px solid var(--border); border-radius:var(--r);
+      padding:.45rem; font-family:'JetBrains Mono',monospace; font-size:.7rem;
+    }
+    .mv { display:flex; align-items:center; gap:.35rem; padding:.15rem .3rem; border-radius:2px; }
+    .mv.last { background:var(--wood-light); font-weight:600; }
+    .mvn { color:var(--muted); min-width:22px; }
+    .mvs { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .mvs.b { background:#111; }
+    .mvs.w { background:#ddd; border:1px solid #aaa; }
+
+    /* spectators */
+    #spectators-list { font-size:.73rem; color:var(--muted); line-height:1.8; }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position:fixed; bottom:1.5rem; left:50%; transform:translateX(-50%) translateY(80px);
+      background:var(--ink); color:#fff; padding:.6rem 1.25rem;
+      border-radius:var(--r); font-size:.82rem; font-weight:600;
+      box-shadow:0 4px 16px rgba(0,0,0,.3); z-index:9999;
+      transition:transform .3s ease;
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeUp   { from{opacity:0;transform:translateY(16px)}  to{opacity:1;transform:translateY(0)} }
+    @keyframes blink    { 0%,100%{opacity:1} 50%{opacity:.3} }
+    @keyframes pulse-pill { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.8;transform:scale(1.04)} }
+
+    #chat-log::-webkit-scrollbar, #move-list::-webkit-scrollbar { width:4px; }
+    #chat-log::-webkit-scrollbar-thumb, #move-list::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+    @media(max-width:900px) {
+      .game-layout { grid-template-columns:1fr; }
+      .board-container { max-width:480px; }
+    }
+    @media(max-width:540px) {
+      .topbar { padding:.6rem 1rem; }
+      #screen-lobby, #screen-game { padding:1rem .75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── TOPBAR ─── -->
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-btn" href="index.html">← Ana Sayfa</a>
+    <span class="page-title">Go Odaları</span>
+  </div>
+  <div class="user-chip" id="user-chip" style="display:none">
+    <div class="user-avatar" id="topbar-avatar"></div>
+    <span id="topbar-name"></span>
+    <button class="logout-btn" onclick="doLogout()">Çıkış</button>
+  </div>
+</div>
+
+<!-- ─── LOGIN SCREEN ─── -->
+<div class="screen active" id="screen-login">
+  <div class="login-logo">围棋<br/><span style="font-size:1.1rem;letter-spacing:.2em">GO ODALARI</span></div>
+  <div class="login-tagline">Arkadaşlarınla oyna</div>
+  <div class="login-card">
+    <h2>Giriş Yap</h2>
+    <p>Oda oluşturmak veya oynamak için Google hesabınla giriş yapman yeterli. Hesap gerekmez, saniyeler içinde hazırsın.</p>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <!-- Google logosu -->
+      <svg viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.95 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Google ile Giriş Yap
+    </button>
+  </div>
+</div>
+
+<!-- ─── LOBBY SCREEN ─── -->
+<div class="screen" id="screen-lobby">
+  <div class="lobby-header">
+    <div class="lobby-title">Açık Odalar</div>
+    <div style="display:flex;gap:.6rem;align-items:center">
+      <span id="room-count" style="font-size:.78rem;color:var(--muted)"></span>
+      <button class="btn primary" onclick="openNewRoomModal()">+ Yeni Oda</button>
+    </div>
+  </div>
+
+  <div class="rooms-grid" id="rooms-grid">
+    <div class="empty-lobby">Henüz açık oda yok.<br/>İlk odayı sen oluştur!</div>
+  </div>
+</div>
+
+<!-- ─── GAME SCREEN ─── -->
+<div class="screen" id="screen-game">
+
+  <!-- Room header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem">
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <button class="btn ghost" onclick="leaveGame()" style="padding:.3rem .65rem;font-size:.78rem">← Lobi</button>
+      <span id="room-title" style="font-family:'Noto Serif',serif;font-size:1.05rem;font-weight:700">Oda</span>
+      <span id="room-meta-bar" style="font-size:.73rem;color:var(--muted)"></span>
+    </div>
+    <!-- Share link -->
+    <div class="share-box" style="max-width:320px;flex:1">
+      <span style="color:var(--muted);white-space:nowrap">🔗</span>
+      <input type="text" id="share-link-input" readonly />
+      <button class="copy-btn" onclick="copyLink()">Kopyala</button>
+    </div>
+  </div>
+
+  <div class="game-layout">
+
+    <!-- SOL PANEL -->
+    <div class="panel">
+      <div class="panel-title">Oyuncular</div>
+
+      <div>
+        <div class="fl" style="margin-bottom:.4rem">Siyah</div>
+        <div class="player-card" id="pc-black">
+          <div class="pc-stone black"></div>
+          <div class="pc-info">
+            <div class="pc-name" id="pc-black-name">Bekleniyor…</div>
+            <div class="pc-sub"  id="pc-black-sub"></div>
+          </div>
+          <div class="pc-clock" id="clock-black">—</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="fl" style="margin-bottom:.4rem">Beyaz</div>
+        <div class="player-card" id="pc-white">
+          <div class="pc-stone white"></div>
+          <div class="pc-info">
+            <div class="pc-name" id="pc-white-name">Bekleniyor…</div>
+            <div class="pc-sub"  id="pc-white-sub"></div>
+          </div>
+          <div class="pc-clock" id="clock-white">—</div>
+        </div>
+      </div>
+
+      <!-- Oyun bilgisi -->
+      <div>
+        <div class="fl" style="margin-bottom:.35rem">Oyun</div>
+        <div id="game-meta" style="font-size:.73rem;font-family:'JetBrains Mono',monospace;color:var(--muted);background:var(--paper);border:1px solid var(--border);border-radius:var(--r);padding:.45rem .6rem;line-height:1.85;">
+          —
+        </div>
+      </div>
+
+      <!-- Hamleler -->
+      <div style="display:flex;flex-direction:column;gap:.35rem;flex:1;min-height:0">
+        <div class="fl">Hamleler</div>
+        <div id="move-list"></div>
+      </div>
+
+      <!-- Skor -->
+      <div style="display:flex;justify-content:space-around;background:var(--paper);border:1px solid var(--border);border-radius:var(--r);padding:.5rem;font-family:'JetBrains Mono',monospace;">
+        <div style="text-align:center">
+          <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Tutsak</div>
+          <div style="font-size:.95rem;font-weight:600" id="cap-b">0</div>
+          <div style="font-size:.6rem;color:var(--muted)">● Siyah</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Tutsak</div>
+          <div style="font-size:.95rem;font-weight:600" id="cap-w">0</div>
+          <div style="font-size:.6rem;color:var(--muted)">○ Beyaz</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORTA: TAHTA -->
+    <div class="board-col">
+      <div class="turn-bar">
+        <div class="turn-stone black" id="turn-stone"></div>
+        <span id="turn-text">Oyun başlamadı</span>
+        <span class="your-turn-pill" id="your-turn-pill">SENİN SIRAN</span>
+        <span class="spectator-pill" id="spectator-pill">İZLEYİCİ</span>
+      </div>
+
+      <div class="board-container">
+        <canvas id="goban"></canvas>
+        <!-- Waiting overlay -->
+        <div class="board-overlay show" id="overlay-wait">
+          <div class="ov-title">Rakip Bekleniyor</div>
+          <div class="ov-sub">Linki arkadaşına gönder veya birinin katılmasını bekle.</div>
+        </div>
+        <!-- Game over overlay -->
+        <div class="board-overlay" id="overlay-over">
+          <div class="ov-title" id="over-title">Oyun Bitti</div>
+          <div class="ov-sub"   id="over-sub"></div>
+          <button class="btn primary" onclick="leaveGame()" style="width:160px">Lobiye Dön</button>
+        </div>
+      </div>
+
+      <div class="game-btns" id="game-btns">
+        <button class="btn" onclick="sendPass()"   id="btn-pass"   disabled>Pas Geç</button>
+        <button class="btn danger" onclick="sendResign()" id="btn-resign" disabled>Teslim Ol</button>
+        <button class="btn danger" onclick="closeRoom()" id="btn-close" style="display:none">🗑 Odayı Kapat</button>
+      </div>
+    </div>
+
+    <!-- SAĞ PANEL -->
+    <div class="panel">
+      <div class="panel-title">Sohbet</div>
+
+      <div id="chat-log"></div>
+
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Mesaj yaz…"
+               onkeydown="if(event.key==='Enter')sendChat()" />
+        <button onclick="sendChat()">↑</button>
+      </div>
+
+      <!-- İzleyiciler -->
+      <div>
+        <div class="fl" style="margin-bottom:.35rem">İzleyiciler <span id="spec-count"></span></div>
+        <div id="spectators-list">—</div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /screen-game -->
+
+<!-- ─── YENİ ODA MODAL ─── -->
+<div id="modal-newroom">
+  <div class="modal-box">
+    <div class="modal-title">Yeni Oda Oluştur</div>
+
+    <div class="fg">
+      <div class="fl">Oda Adı</div>
+      <input type="text" id="room-name-input" placeholder="Örn: Dostlar Arası Maç" maxlength="40" />
+    </div>
+
+    <div class="fg">
+      <div class="fl">Tahta Boyutu</div>
+      <div class="fw">
+        <select id="room-size">
+          <option value="19" selected>19×19 (Standart)</option>
+          <option value="13">13×13 (Orta)</option>
+          <option value="9">9×9 (Başlangıç)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg">
+      <div class="fl">Komi</div>
+      <div class="fw">
+        <select id="room-komi">
+          <option value="6.5" selected>6.5 (Standart)</option>
+          <option value="7.5">7.5</option>
+          <option value="0">0 (Eşit)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg">
+      <div class="fl">Taş Rengim</div>
+      <div class="fw">
+        <select id="room-color">
+          <option value="black" selected>Siyah (Ben başlarım)</option>
+          <option value="white">Beyaz</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="fg">
+      <div class="fl">Süre Limiti (dakika/hamle)</div>
+      <div class="fw">
+        <select id="room-time">
+          <option value="0">Süresiz</option>
+          <option value="1">1 dk</option>
+          <option value="3" selected>3 dk</option>
+          <option value="5">5 dk</option>
+          <option value="10">10 dk</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-btns">
+      <button class="btn ghost" onclick="closeNewRoomModal()">İptal</button>
+      <button class="btn primary" onclick="createRoom()">Oluştur</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast"></div>
+
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   !! BURAYA KENDİ FIREBASE CONFIG'İNİ YAPISTIR !!
+
+   console.firebase.google.com → Proje Ayarları →
+   Web Uygulaması Ekle → firebaseConfig'i kopyala
+═══════════════════════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey:            "BURAYA_API_KEY",
+  authDomain:        "BURAYA_AUTH_DOMAIN",
+  databaseURL:       "BURAYA_DATABASE_URL",
+  projectId:         "BURAYA_PROJECT_ID",
+  storageBucket:     "BURAYA_STORAGE_BUCKET",
+  messagingSenderId: "BURAYA_MESSAGING_SENDER_ID",
+  appId:             "BURAYA_APP_ID",
+};
+
+/* ═══════════════════════════════════════════════════════
+   FIREBASE BAŞLAT
+═══════════════════════════════════════════════════════ */
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db   = firebase.database();
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let ME = null;       // { uid, displayName, photoURL }
+let ROOM = null;     // aktif oda verisi
+let ROOM_ID = null;
+let MY_COLOR = null; // 'black' | 'white' | 'spectator'
+let boardSize = 19;
+let boardGrid = [];
+let lastXY    = null;
+let moveHist  = [];
+let captures  = { black:0, white:0 };
+let clockIntervals = { black:null, white:null };
+let clockSeconds   = { black:0, white:0 };
+
+// Firebase listeners (temizleme için)
+let lobbyListener = null;
+let gameListener  = null;
+let chatListener  = null;
+let specListener  = null;
+
+/* ═══════════════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════════════ */
+auth.onAuthStateChanged(user => {
+  if (user) {
+    ME = { uid:user.uid, displayName:user.displayName, photoURL:user.photoURL };
+    showTopbarUser();
+    checkUrlRoom(); // URL'de ?room=ID var mı?
+  } else {
+    ME = null;
+    showScreen('login');
+  }
+});
+
+function signInWithGoogle() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(e => showToast('Giriş hatası: '+e.message));
+}
+
+function doLogout() {
+  cleanupListeners();
+  auth.signOut();
+}
+
+function showTopbarUser() {
+  document.getElementById('user-chip').style.display='flex';
+  document.getElementById('topbar-name').textContent = ME.displayName;
+  const av = document.getElementById('topbar-avatar');
+  if (ME.photoURL) av.innerHTML=`<img src="${ME.photoURL}" alt="avatar"/>`;
+  else av.textContent = ME.displayName[0].toUpperCase();
+}
+
+/* ═══════════════════════════════════════════════════════
+   SCREEN YÖNETİMİ
+═══════════════════════════════════════════════════════ */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════
+   URL ROOM CHECK (link ile katılma)
+═══════════════════════════════════════════════════════ */
+function checkUrlRoom() {
+  const params = new URLSearchParams(window.location.search);
+  const roomId = params.get('room');
+  if (roomId) {
+    history.replaceState(null,'',window.location.pathname);
+    joinRoom(roomId);
+  } else {
+    showLobby();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOBİ
+═══════════════════════════════════════════════════════ */
+function showLobby() {
+  cleanupGameListeners();
+  ROOM = null; ROOM_ID = null; MY_COLOR = null;
+  showScreen('lobby');
+  listenLobby();
+}
+
+function listenLobby() {
+  if (lobbyListener) db.ref('rooms').off('value', lobbyListener);
+  lobbyListener = db.ref('rooms').orderByChild('createdAt').on('value', snap => {
+    const rooms = [];
+    snap.forEach(child => {
+      const r = child.val();
+      if (r && !r.deleted) rooms.unshift({ id:child.key, ...r });
+    });
+    renderLobby(rooms);
+  });
+}
+
+function renderLobby(rooms) {
+  const grid = document.getElementById('rooms-grid');
+  document.getElementById('room-count').textContent =
+    rooms.length ? `${rooms.length} oda` : '';
+
+  if (!rooms.length) {
+    grid.innerHTML='<div class="empty-lobby">Henüz açık oda yok.<br/>İlk odayı sen oluştur! 🎯</div>';
+    return;
+  }
+
+  grid.innerHTML='';
+  rooms.forEach(r => {
+    const isPlaying = r.black && r.white && r.status !== 'finished';
+    const isFinished= r.status === 'finished';
+    const moveCount = r.moves ? Object.keys(r.moves).length : 0;
+    const specCount = r.spectators ? Object.keys(r.spectators).length : 0;
+
+    const badge = isFinished ? 'watching' :
+                  isPlaying  ? 'playing' : 'waiting';
+    const badgeText = isFinished ? 'Bitti' :
+                      isPlaying  ? 'Oyunda' : 'Katılabilir';
+
+    const isOwner = ME && r.black?.uid === ME.uid;
+    const card = document.createElement('div');
+    card.className = 'room-card';
+    card.onclick = () => joinRoom(r.id);
+    card.innerHTML = `
+      <div class="room-card-header">
+        <div class="room-name">${esc(r.name||'İsimsiz Oda')}</div>
+        <div style="display:flex;align-items:center;gap:.4rem">
+          <div class="room-badge ${badge}">${badgeText}</div>
+          ${isOwner ? `<button class="delete-room-btn" data-id="${r.id}" title="Odayı Sil">🗑</button>` : ''}
+        </div>
+      </div>
+      <div class="room-players">
+        <div class="player-slot">
+          <span class="ps-stone b"></span>
+          <span class="ps-name">${esc(r.black?.name||'—')}</span>
+        </div>
+        <span class="vs-sep">vs</span>
+        <div class="player-slot">
+          <span class="ps-stone w"></span>
+          <span class="ps-name">${esc(r.white?.name||'—')}</span>
+        </div>
+      </div>
+      <div class="room-meta">
+        <span class="room-tag">${r.size||19}×${r.size||19}</span>
+        <span class="room-tag">Komi ${r.komi||6.5}</span>
+        <span class="room-tag">${r.timeLimit>0?r.timeLimit+'dk':'Süresiz'}</span>
+        <span class="room-tag">${moveCount} hamle</span>
+      </div>
+      ${specCount ? `<div class="room-spectators">👁 ${specCount} izleyici</div>` : ''}
+    `;
+    // Çöp butonu click — kart tıklamasını engelle
+    const delBtn = card.querySelector('.delete-room-btn');
+    if(delBtn){
+      delBtn.onclick = async (e) => {
+        e.stopPropagation();
+        if(!confirm('Bu odayı silmek istediğinize emin misiniz?')) return;
+        await deleteRoom(delBtn.dataset.id);
+        showToast('Oda silindi.');
+      };
+    }
+    grid.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   YENİ ODA
+═══════════════════════════════════════════════════════ */
+function openNewRoomModal() {
+  document.getElementById('room-name-input').value = `${ME.displayName}'ın Odası`;
+  document.getElementById('modal-newroom').classList.add('show');
+}
+function closeNewRoomModal() {
+  document.getElementById('modal-newroom').classList.remove('show');
+}
+
+async function createRoom() {
+  const name      = document.getElementById('room-name-input').value.trim() || 'İsimsiz Oda';
+  const size      = parseInt(document.getElementById('room-size').value);
+  const komi      = parseFloat(document.getElementById('room-komi').value);
+  const myColor   = document.getElementById('room-color').value;
+  const timeLimit = parseInt(document.getElementById('room-time').value);
+
+  closeNewRoomModal();
+
+  const roomData = {
+    name, size, komi, timeLimit,
+    status: 'waiting',
+    createdAt: firebase.database.ServerValue.TIMESTAMP,
+    [myColor]: { uid:ME.uid, name:ME.displayName },
+  };
+
+  const ref  = db.ref('rooms').push();
+  ROOM_ID    = ref.key;
+  await ref.set(roomData);
+
+  joinRoom(ROOM_ID);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ODAYA KATIL
+═══════════════════════════════════════════════════════ */
+async function joinRoom(roomId) {
+  ROOM_ID = roomId;
+  const snap = await db.ref(`rooms/${roomId}`).get();
+  if (!snap.exists()) { showToast('Oda bulunamadı.'); showLobby(); return; }
+
+  const room = snap.val();
+  ROOM = room;
+
+  // Rolü belirle
+  if (room.black?.uid === ME.uid)       MY_COLOR = 'black';
+  else if (room.white?.uid === ME.uid)  MY_COLOR = 'white';
+  else if (!room.black) {
+    // Siyah boşsa otur
+    MY_COLOR = 'black';
+    await db.ref(`rooms/${roomId}/black`).set({ uid:ME.uid, name:ME.displayName });
+  } else if (!room.white && room.status !== 'finished') {
+    // Beyaz boşsa otur
+    MY_COLOR = 'white';
+    await db.ref(`rooms/${roomId}/white`).set({ uid:ME.uid, name:ME.displayName });
+    await db.ref(`rooms/${roomId}/status`).set('playing');
+  } else {
+    MY_COLOR = 'spectator';
+    // İzleyici olarak kayıt
+    await db.ref(`rooms/${roomId}/spectators/${ME.uid}`).set(ME.displayName);
+  }
+
+  setupGameScreen(room, roomId);
+  listenGame(roomId);
+  listenChat(roomId);
+  listenSpectators(roomId);
+}
+
+/* ═══════════════════════════════════════════════════════
+   OYUN EKRANI KURULUM
+═══════════════════════════════════════════════════════ */
+function setupGameScreen(room, roomId) {
+  showScreen('game');
+  boardSize = room.size || 19;
+  boardGrid = Array.from({length:boardSize},()=>Array(boardSize).fill(null));
+  lastXY=null; moveHist=[]; captures={black:0,white:0};
+
+  // Başlık & meta
+  document.getElementById('room-title').textContent = room.name || 'Oda';
+  document.getElementById('room-meta-bar').textContent =
+    `${boardSize}×${boardSize} · Komi ${room.komi||6.5}`;
+  document.getElementById('game-meta').innerHTML =
+    `Boyut: ${boardSize}×${boardSize}<br/>Komi: ${room.komi||6.5}<br/>Süre: ${room.timeLimit>0?room.timeLimit+'dk':'Süresiz'}<br/>ID: ${roomId}`;
+
+  // Share link
+  const link = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+  document.getElementById('share-link-input').value = link;
+
+  // Spectator pill
+  document.getElementById('spectator-pill').classList.toggle('show', MY_COLOR==='spectator');
+
+  // Tahta
+  initCanvas();
+
+  // Oyun butonları
+  const canPlay = MY_COLOR !== 'spectator';
+  document.getElementById('btn-pass').disabled   = !canPlay;
+  document.getElementById('btn-resign').disabled = !canPlay;
+  // Odayı Kapat butonu sadece oda sahibine (siyah = kurucu)
+  const isOwner = room.black?.uid === ME?.uid;
+  document.getElementById('btn-close').style.display = isOwner ? 'block' : 'none';
+
+  // Saatler
+  if (room.timeLimit > 0) {
+    clockSeconds = { black: room.timeLimit*60, white: room.timeLimit*60 };
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   FIREBASE DİNLEYİCİLERİ
+═══════════════════════════════════════════════════════ */
+function listenGame(roomId) {
+  if (gameListener) db.ref(`rooms/${ROOM_ID}`).off('value', gameListener);
+  gameListener = db.ref(`rooms/${roomId}`).on('value', snap => {
+    if (!snap.exists()) return;
+    ROOM = snap.val();
+    onRoomUpdate(ROOM);
+  });
+}
+
+function listenChat(roomId) {
+  if (chatListener) db.ref(`rooms/${ROOM_ID}/chat`).off('child_added', chatListener);
+  document.getElementById('chat-log').innerHTML='';
+  chatListener = db.ref(`rooms/${roomId}/chat`).limitToLast(100).on('child_added', snap => {
+    const m = snap.val();
+    addChatMsg(m.name, m.text, m.sys);
+  });
+}
+
+function listenSpectators(roomId) {
+  if (specListener) db.ref(`rooms/${ROOM_ID}/spectators`).off('value', specListener);
+  specListener = db.ref(`rooms/${roomId}/spectators`).on('value', snap => {
+    const specs = snap.val() || {};
+    const names = Object.values(specs);
+    document.getElementById('spec-count').textContent = names.length ? `(${names.length})` : '';
+    document.getElementById('spectators-list').textContent = names.join(', ') || '—';
+  });
+}
+
+function cleanupListeners() {
+  cleanupGameListeners();
+  if (lobbyListener) { db.ref('rooms').off('value', lobbyListener); lobbyListener=null; }
+}
+
+function cleanupGameListeners() {
+  if (gameListener)  { db.ref(`rooms/${ROOM_ID}`).off('value',gameListener); gameListener=null; }
+  if (chatListener)  { db.ref(`rooms/${ROOM_ID}/chat`).off('child_added',chatListener); chatListener=null; }
+  if (specListener)  { db.ref(`rooms/${ROOM_ID}/spectators`).off('value',specListener); specListener=null; }
+  Object.values(clockIntervals).forEach(i=>clearInterval(i));
+  clockIntervals={black:null,white:null};
+  // İzleyici kaydını kaldır
+  if (ROOM_ID && ME && MY_COLOR==='spectator')
+    db.ref(`rooms/${ROOM_ID}/spectators/${ME.uid}`).remove();
+}
+
+/* ═══════════════════════════════════════════════════════
+   ODA GÜNCELLEMESİ
+═══════════════════════════════════════════════════════ */
+function onRoomUpdate(room) {
+  // Oyuncu kartları
+  updatePlayerCard('black', room.black);
+  updatePlayerCard('white', room.white);
+
+  // Durum
+  const hasBoth = room.black && room.white;
+  if (!hasBoth && room.status !== 'finished') {
+    document.getElementById('overlay-wait').classList.add('show');
+  } else {
+    document.getElementById('overlay-wait').classList.remove('show');
+  }
+
+  if (room.status === 'finished') {
+    showGameOver(room.result || 'Oyun bitti');
+  }
+
+  // Hamleleri senkronize et
+  syncMoves(room.moves || {});
+
+  // Sıra
+  const moveCount = Object.keys(room.moves||{}).length;
+  const turnColor = moveCount%2===0 ? 'black' : 'white';
+  const myTurn = MY_COLOR === turnColor && hasBoth && room.status !== 'finished';
+
+  document.getElementById('turn-stone').className='turn-stone '+turnColor;
+  document.getElementById('turn-text').textContent =
+    (turnColor==='black'?'Siyah':'Beyaz')+"'ın sırası";
+  document.getElementById('your-turn-pill').classList.toggle('show', myTurn);
+
+  // Tahta click
+  const cv = document.getElementById('goban');
+  cv.style.cursor = myTurn ? 'crosshair' : 'default';
+
+  // Captures
+  document.getElementById('cap-b').textContent = captures.black;
+  document.getElementById('cap-w').textContent = captures.white;
+}
+
+function updatePlayerCard(color, player) {
+  document.getElementById(`pc-${color}-name`).textContent = player?.name || 'Bekleniyor…';
+  document.getElementById(`pc-${color}-sub`).textContent  = player?.uid===ME?.uid ? '(Sen)' : '';
+}
+
+/* ═══════════════════════════════════════════════════════
+   HAMLELERİ SENKRONİZE ET
+═══════════════════════════════════════════════════════ */
+function syncMoves(movesObj) {
+  const sorted = Object.entries(movesObj).sort((a,b)=>a[1].n-b[1].n);
+  const newCount = sorted.length;
+  const oldCount = moveHist.length;
+  if (newCount === oldCount) return; // değişiklik yok
+
+  // Tahtayı sıfırla ve tümünü tekrar uygula
+  boardGrid = Array.from({length:boardSize},()=>Array(boardSize).fill(null));
+  captures  = {black:0,white:0};
+  moveHist  = [];
+  lastXY    = null;
+
+  sorted.forEach(([,mv]) => {
+    const color = mv.color;
+    if (mv.pass) {
+      moveHist.push({color, coord:'PAS'});
+      return;
+    }
+    const {x,y} = mv;
+    boardGrid[y][x] = color;
+    lastXY=[x,y];
+    checkCaptures(x,y,color);
+    moveHist.push({color, coord:LTRS[x]+(boardSize-y)});
+  });
+
+  drawBoard();
+  renderMoveList();
+  document.getElementById('cap-b').textContent=captures.black;
+  document.getElementById('cap-w').textContent=captures.white;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CANVAS TAHTA
+═══════════════════════════════════════════════════════ */
+const LTRS='ABCDEFGHJKLMNOPQRST';
+const inB=(x,y,s)=>x>=0&&y>=0&&x<s&&y<s;
+const opp=c=>c==='black'?'white':'black';
+
+function initCanvas(){
+  const cv=document.getElementById('goban');
+  const wrap=cv.parentElement;
+  const fit=()=>{
+    const r=wrap.getBoundingClientRect();
+    cv.width=r.width||540; cv.height=r.height||540;
+    drawBoard();
+  };
+  setTimeout(fit,50); window.addEventListener('resize',fit);
+
+  cv.onclick=e=>{
+    if (MY_COLOR==='spectator'||!ROOM||ROOM.status==='finished') return;
+    const moveCount=moveHist.length;
+    const turnColor=moveCount%2===0?'black':'white';
+    if (MY_COLOR!==turnColor) return;
+    if (!ROOM.black||!ROOM.white) return;
+
+    const rect=cv.getBoundingClientRect();
+    const sx=cv.width/rect.width,sy=cv.height/rect.height;
+    const cx=(e.clientX-rect.left)*sx,cy=(e.clientY-rect.top)*sy;
+    const {m,st}=met(cv.width);
+    const xi=Math.round((cx-m)/st),yi=Math.round((cy-m)/st);
+    if(!inB(xi,yi,boardSize)||boardGrid[yi][xi]) return;
+    submitMove(xi,yi);
+  };
+}
+
+function met(s){const m=s*.06,st=(s-m*2)/(boardSize-1);return{m,st};}
+
+function drawBoard(){
+  const cv=document.getElementById('goban');
+  if(!cv.width) return;
+  const ctx=cv.getContext('2d');
+  const s=cv.width;const{m,st}=met(s);
+
+  ctx.fillStyle='#dcb468';ctx.fillRect(0,0,s,s);
+  const g=ctx.createLinearGradient(0,0,s,s);
+  g.addColorStop(0,'rgba(255,220,120,.18)');g.addColorStop(1,'rgba(140,80,0,.10)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,s,s);
+
+  ctx.strokeStyle='#7a5010';ctx.lineWidth=1;
+  for(let i=0;i<boardSize;i++){
+    const px=m+i*st,py=m+i*st;
+    ctx.beginPath();ctx.moveTo(px,m);ctx.lineTo(px,m+(boardSize-1)*st);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(m,py);ctx.lineTo(m+(boardSize-1)*st,py);ctx.stroke();
+  }
+  ctx.fillStyle='#7a5010';
+  for(const[sx2,sy2]of stars(boardSize)){
+    ctx.beginPath();ctx.arc(m+sx2*st,m+sy2*st,st*.09,0,Math.PI*2);ctx.fill();
+  }
+  ctx.font=`${Math.max(9,st*.3)}px 'JetBrains Mono',monospace`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  for(let i=0;i<boardSize;i++){
+    const px=m+i*st;
+    ctx.fillText(LTRS[i],px,m*.42);ctx.fillText(LTRS[i],px,s-m*.42);
+    ctx.fillText(String(boardSize-i),m*.42,m+i*st);ctx.fillText(String(boardSize-i),s-m*.42,m+i*st);
+  }
+  for(let y=0;y<boardSize;y++)
+    for(let x=0;x<boardSize;x++)
+      if(boardGrid[y][x])
+        drawStone(ctx,m+x*st,m+y*st,st*.46,boardGrid[y][x],lastXY&&lastXY[0]===x&&lastXY[1]===y);
+}
+
+function drawStone(ctx,cx,cy,r,col,mark){
+  ctx.save();
+  if(col==='black'){
+    const g=ctx.createRadialGradient(cx-r*.3,cy-r*.3,r*.05,cx,cy,r);
+    g.addColorStop(0,'#555');g.addColorStop(1,'#111');ctx.fillStyle=g;
+    ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=4;ctx.shadowOffsetX=2;ctx.shadowOffsetY=2;
+  }else{
+    const g=ctx.createRadialGradient(cx-r*.3,cy-r*.3,r*.05,cx,cy,r);
+    g.addColorStop(0,'#fff');g.addColorStop(1,'#ccc');ctx.fillStyle=g;
+    ctx.shadowColor='rgba(0,0,0,.3)';ctx.shadowBlur=3;ctx.shadowOffsetX=1;ctx.shadowOffsetY=2;
+  }
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+  if(col==='white'){ctx.strokeStyle='#aaa';ctx.lineWidth=.5;ctx.stroke();}
+  if(mark){
+    ctx.shadowColor='transparent';
+    ctx.strokeStyle=col==='black'?'rgba(255,255,255,.7)':'rgba(0,0,0,.5)';
+    ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,r*.38,0,Math.PI*2);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function stars(sz){
+  if(sz===19)return[[3,3],[9,3],[15,3],[3,9],[9,9],[15,9],[3,15],[9,15],[15,15]];
+  if(sz===13)return[[3,3],[9,3],[3,9],[9,9],[6,6]];
+  return[[2,2],[6,2],[4,4],[2,6],[6,6]];
+}
+
+/* ═══════════════════════════════════════════════════════
+   CAPTURE
+═══════════════════════════════════════════════════════ */
+function checkCaptures(mx,my,color){
+  let cap=0;
+  for(const[dx,dy]of[[0,-1],[0,1],[-1,0],[1,0]]){
+    const nx=mx+dx,ny=my+dy;
+    if(!inB(nx,ny,boardSize)||boardGrid[ny][nx]!==opp(color)) continue;
+    const grp=getGroup(nx,ny);
+    if(!liberties(grp).length){grp.forEach(([gx,gy])=>boardGrid[gy][gx]=null);cap+=grp.length;}
+  }
+  if(cap) captures[color]+=cap;
+}
+function getGroup(x,y){
+  const col=boardGrid[y][x],vis=new Set(),q=[[x,y]],r=[];
+  while(q.length){const[cx,cy]=q.shift(),k=`${cx},${cy}`;if(vis.has(k))continue;vis.add(k);if(!inB(cx,cy,boardSize)||boardGrid[cy][cx]!==col)continue;r.push([cx,cy]);for(const[dx,dy]of[[0,-1],[0,1],[-1,0],[1,0]])q.push([cx+dx,cy+dy]);}
+  return r;
+}
+function liberties(grp){
+  const s=new Set();
+  for(const[x,y]of grp)for(const[dx,dy]of[[0,-1],[0,1],[-1,0],[1,0]]){const nx=x+dx,ny=y+dy;if(inB(nx,ny,boardSize)&&!boardGrid[ny][nx])s.add(`${nx},${ny}`);}
+  return[...s];
+}
+
+/* ═══════════════════════════════════════════════════════
+   HAMLELERİ FIREBASE'E YOLLA
+═══════════════════════════════════════════════════════ */
+async function submitMove(x,y){
+  const n=moveHist.length;
+  await db.ref(`rooms/${ROOM_ID}/moves/${n}`).set({
+    n, color:MY_COLOR, x, y,
+    ts: firebase.database.ServerValue.TIMESTAMP
+  });
+  sysMsg(`${MY_COLOR==='black'?'Siyah':'Beyaz'}: ${LTRS[x]+(boardSize-y)}`);
+}
+
+async function sendPass(){
+  const n=moveHist.length;
+  await db.ref(`rooms/${ROOM_ID}/moves/${n}`).set({
+    n, color:MY_COLOR, pass:true,
+    ts: firebase.database.ServerValue.TIMESTAMP
+  });
+  sysMsg(`${MY_COLOR==='black'?'Siyah':'Beyaz'} pas geçti.`);
+
+  // İki ardışık pas → oyun biter
+  if(n>0&&moveHist[n-1]?.coord==='PAS'){
+    await db.ref(`rooms/${ROOM_ID}`).update({
+      status:'finished',
+      result:`İki pas — sayım yapılıyor`
+    });
+  }
+}
+
+async function sendResign(){
+  if(!confirm('Teslim olmak istediğinize emin misiniz?')) return;
+  const winner=opp(MY_COLOR);
+  await db.ref(`rooms/${ROOM_ID}`).update({
+    status:'finished',
+    result:`${winner==='black'?'Siyah':'Beyaz'} kazandı (teslim)`
+  });
+}
+
+function showGameOver(result){
+  document.getElementById('overlay-over').classList.add('show');
+  document.getElementById('over-title').textContent='Oyun Bitti';
+  document.getElementById('over-sub').textContent=result;
+  document.getElementById('btn-pass').disabled=true;
+  document.getElementById('btn-resign').disabled=true;
+  // Oyun bitince 10 saniye sonra odayı otomatik sil
+  setTimeout(() => deleteRoom(ROOM_ID), 10000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CHAT
+═══════════════════════════════════════════════════════ */
+async function sendChat(){
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text||!ROOM_ID) return;
+  input.value='';
+  await db.ref(`rooms/${ROOM_ID}/chat`).push({
+    name:ME.displayName, text, ts:firebase.database.ServerValue.TIMESTAMP
+  });
+}
+
+function addChatMsg(name,text,sys=false){
+  const el=document.getElementById('chat-log');
+  const d=document.createElement('div');
+  d.className='cm';
+  if(sys) d.innerHTML=`<span class="cs">${esc(text)}</span>`;
+  else d.innerHTML=`<span class="cu">${esc(name)}:</span> ${esc(text)}`;
+  el.appendChild(d);
+  el.scrollTop=el.scrollHeight;
+}
+
+async function sysMsg(text){
+  await db.ref(`rooms/${ROOM_ID}/chat`).push({
+    name:'Sistem', text, sys:true,
+    ts:firebase.database.ServerValue.TIMESTAMP
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   MOVE LIST
+═══════════════════════════════════════════════════════ */
+function renderMoveList(){
+  const el=document.getElementById('move-list');
+  el.innerHTML='';
+  moveHist.forEach((h,i)=>{
+    const d=document.createElement('div');
+    d.className='mv'+(i===moveHist.length-1?' last':'');
+    d.innerHTML=`<span class="mvn">${i+1}.</span><span class="mvs ${h.color==='black'?'b':'w'}"></span><span>${h.coord}</span>`;
+    el.appendChild(d);
+  });
+  el.scrollTop=el.scrollHeight;
+}
+
+/* ═══════════════════════════════════════════════════════
+   YARDIMCILAR
+═══════════════════════════════════════════════════════ */
+function leaveGame(){
+  cleanupGameListeners();
+  ROOM=null;ROOM_ID=null;MY_COLOR=null;
+  showLobby();
+}
+
+async function deleteRoom(roomId){
+  if(!roomId) return;
+  try {
+    await db.ref(`rooms/${roomId}`).remove();
+  } catch(e) { console.warn('Oda silinemedi:', e); }
+}
+
+async function closeRoom(){
+  if(!ROOM_ID||!ME) return;
+  const snap = await db.ref(`rooms/${ROOM_ID}`).get();
+  if(!snap.exists()) return;
+  const room = snap.val();
+  // Sadece oda sahibi silebilir (siyah oyuncu = oda kurucusu)
+  if(room.black?.uid !== ME.uid) {
+    showToast('Sadece oda sahibi odayı kapatabilir.'); return;
+  }
+  if(!confirm('Odayı kapatmak istediğinize emin misiniz?')) return;
+  await deleteRoom(ROOM_ID);
+  cleanupGameListeners();
+  ROOM=null;ROOM_ID=null;MY_COLOR=null;
+  showLobby();
+  showToast('Oda kapatıldı.');
+}
+
+function copyLink(){
+  const input=document.getElementById('share-link-input');
+  navigator.clipboard.writeText(input.value).then(()=>showToast('Link kopyalandı! 🔗'));
+}
+
+function showToast(msg,dur=2500){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+</script>
+</body>
+</html>
