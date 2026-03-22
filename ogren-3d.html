@@ -7,58 +7,62 @@
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* ── Açık zemin ── */
-            --bg:           #d8d8d4;
-            --bg2:          #cececa;
-            --bg3:          #c8c8c4;
-            --bg4:          #c0c0bc;
+            /* ── Koyu neumorphic zemin — index.html ile birebir ── */
+            --bg:           #1c1c20;
+            --bg-l:         #232328;
+            --bg-d:         #141417;
+            --bg2:          #232328;
+            --bg3:          #232328;
+            --bg4:          #1a1a1e;
 
-            /* ── Jade / yeşil aksan ── */
-            --jade:         #2d6647;
-            --jade-mid:     #3a8560;
-            --jade-bright:  #48a076;
-            --jade-glow:    rgba(45,102,71,.25);
-            --jade-glass:   rgba(45,102,71,.1);
-            --jade-frost:   rgba(45,102,71,.14);
+            /* ── Altın aksan — index.html'den ── */
+            --gold:         #c8a84b;
+            --gold2:        #e0be68;
+            --gold-glow:    rgba(200,168,75,.18);
+            --gold-glass:   rgba(200,168,75,.1);
+            --gold-frost:   rgba(200,168,75,.15);
+            --gold-border:  rgba(200,168,75,.28);
 
-            /* ── Glassmorphic yüzeyler ── */
-            --glass-dark:   rgba(220,220,216,.78);
-            --glass-mid:    rgba(215,215,210,.72);
-            --glass-light:  rgba(210,210,205,.65);
+            /* ── Alias — eski jade değişkenlerini gold'a yönlendir ── */
+            --jade:         #c8a84b;
+            --jade-mid:     #d4b455;
+            --jade-bright:  #e0be68;
+            --jade-glow:    rgba(200,168,75,.25);
+            --jade-glass:   rgba(200,168,75,.1);
+            --jade-frost:   rgba(200,168,75,.15);
 
-            /* ── Neumorphic ışık/gölge ── */
-            --nm-light:     rgba(255,255,255,.7);
-            --nm-shadow:    rgba(0,0,0,.15);
-            --nm-inset-l:   rgba(255,255,255,.6);
-            --nm-inset-s:   rgba(0,0,0,.12);
+            /* ── Neumorphic gölgeler — index.html ile birebir ── */
+            --sh-l:         rgba(38,38,44,0.9);
+            --sh-d:         rgba(10,10,12,0.9);
+            --nm-box:       6px 6px 16px var(--sh-d), -6px -6px 16px var(--sh-l);
+            --nm-inset:     inset 4px 4px 10px var(--sh-d), inset -4px -4px 10px var(--sh-l);
+            --nm-press:     inset 3px 3px 8px var(--sh-d), inset -3px -3px 8px var(--sh-l);
+            --nm-light:     rgba(38,38,44,0.9);
+            --nm-shadow:    rgba(10,10,12,0.9);
+            --nm-inset-l:   rgba(38,38,44,0.9);
+            --nm-inset-s:   rgba(10,10,12,0.9);
 
-            /* ── Neumorphic kutular ── */
-            --nm-box:
-                4px 4px 10px rgba(0,0,0,.18),
-               -3px -3px 8px rgba(255,255,255,.75);
-            --nm-inset:
-                inset 3px 3px 7px rgba(0,0,0,.14),
-                inset -2px -2px 5px rgba(255,255,255,.7);
-            --nm-press:
-                inset 4px 4px 9px rgba(0,0,0,.18),
-                inset -2px -2px 5px rgba(255,255,255,.65);
+            /* ── Glass yüzeyler — koyu zemin için ── */
+            --glass-dark:   rgba(28,28,32,.85);
+            --glass-mid:    rgba(32,32,36,.8);
+            --glass-light:  rgba(36,36,40,.75);
 
             /* ── Metin ── */
-            --text:         #1a2018;
-            --text2:        #3d4a3a;
-            --text3:        #7a8a76;
-            --text-accent:  #2d7a50;
+            --text:         #e8e4de;
+            --text2:        #7a7670;
+            --text3:        #484540;
+            --text-accent:  #c8a84b;
 
             /* ── Kenarlık ── */
-            --border:       rgba(0,0,0,.1);
-            --border-jade:  rgba(45,122,80,.3);
-            --border-top:   rgba(255,255,255,.8);
+            --border:       rgba(255,255,255,.05);
+            --border-jade:  rgba(200,168,75,.28);
+            --border-top:   rgba(200,168,75,.2);
 
             /* ── Gölgeler ── */
-            --sh1:  0 2px 8px rgba(0,0,0,.12);
-            --sh2:  0 8px 28px rgba(0,0,0,.14);
-            --sh3:  0 20px 60px rgba(0,0,0,.2);
-            --sh-jade: 0 6px 24px rgba(45,122,80,.2);
+            --sh1:  0 2px 8px rgba(0,0,0,.5);
+            --sh2:  6px 6px 16px var(--sh-d), -6px -6px 16px var(--sh-l);
+            --sh3:  10px 10px 22px var(--sh-d), -10px -10px 22px var(--sh-l);
+            --sh-jade: 0 6px 24px rgba(200,168,75,.15);
 
             /* ── Blur ── */
             --blur:  blur(24px);
@@ -68,6 +72,7 @@
             --r:  20px;
             --r2: 12px;
             --r3: 30px;
+        }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -78,25 +83,17 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ── Zemin gradyanı ── */
+        /* ── Zemin: index.html ile birebir altın grid ── */
         body::before {
             content: '';
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background:
-                radial-gradient(ellipse 65% 55% at 80% 10%, rgba(61,122,92,.09) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 40% at 10% 90%, rgba(61,122,92,.06) 0%, transparent 55%),
-                radial-gradient(ellipse 35% 30% at 50% 50%, rgba(200,200,190,.3) 0%, transparent 60%);
+            background-image:
+                linear-gradient(rgba(200,168,75,.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(200,168,75,.04) 1px, transparent 1px);
+            background-size: 44px 44px;
         }
 
-        /* ── Goban çizgileri ── */
-        body::after {
-            content: '';
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background-image:
-                linear-gradient(rgba(100,110,100,.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(100,110,100,.06) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
+        body::after { content: none; }
 
         .page {
             position: relative; z-index: 1;
