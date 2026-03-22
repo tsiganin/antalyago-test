@@ -4,65 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Go Öğren – Antalya GO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* ── Koyu neumorphic zemin — index.html ile birebir ── */
-            --bg:           #1c1c20;
-            --bg-l:         #232328;
-            --bg-d:         #141417;
-            --bg2:          #232328;
-            --bg3:          #232328;
-            --bg4:          #1a1a1e;
+            /* ── Zemin: sıcak krem/bej ── */
+            --bg:           #f2ede6;
+            --bg-l:         #f8f5f0;
+            --bg-d:         #e8e2da;
+            --bg2:          #f5f0e8;
+            --bg3:          #ece6de;
+            --bg4:          #e4ddd4;
 
-            /* ── Altın aksan — index.html'den ── */
-            --gold:         #c8a84b;
-            --gold2:        #e0be68;
-            --gold-glow:    rgba(200,168,75,.18);
-            --gold-glass:   rgba(200,168,75,.1);
-            --gold-frost:   rgba(200,168,75,.15);
-            --gold-border:  rgba(200,168,75,.28);
+            /* ── Altın aksan ── */
+            --gold:         #a07828;
+            --gold2:        #c8a84b;
+            --gold-glow:    rgba(160,120,40,.2);
+            --gold-glass:   rgba(200,168,75,.12);
+            --gold-frost:   rgba(200,168,75,.18);
+            --gold-border:  rgba(160,120,40,.3);
 
-            /* ── Alias — eski jade değişkenlerini gold'a yönlendir ── */
-            --jade:         #c8a84b;
-            --jade-mid:     #d4b455;
-            --jade-bright:  #e0be68;
-            --jade-glow:    rgba(200,168,75,.25);
+            --jade:         #a07828;
+            --jade-mid:     #b89038;
+            --jade-bright:  #c8a84b;
+            --jade-glow:    rgba(160,120,40,.2);
             --jade-glass:   rgba(200,168,75,.1);
-            --jade-frost:   rgba(200,168,75,.15);
+            --jade-frost:   rgba(200,168,75,.14);
 
-            /* ── Neumorphic gölgeler — index.html ile birebir ── */
-            --sh-l:         rgba(38,38,44,0.9);
-            --sh-d:         rgba(10,10,12,0.9);
-            --nm-box:       6px 6px 16px var(--sh-d), -6px -6px 16px var(--sh-l);
-            --nm-inset:     inset 4px 4px 10px var(--sh-d), inset -4px -4px 10px var(--sh-l);
-            --nm-press:     inset 3px 3px 8px var(--sh-d), inset -3px -3px 8px var(--sh-l);
-            --nm-light:     rgba(38,38,44,0.9);
-            --nm-shadow:    rgba(10,10,12,0.9);
-            --nm-inset-l:   rgba(38,38,44,0.9);
-            --nm-inset-s:   rgba(10,10,12,0.9);
+            /* ── Neumorphic gölgeler — açık zemin ── */
+            --sh-l:         rgba(255,252,246,0.98);
+            --sh-d:         rgba(168,158,140,0.65);
+            --nm-box:       5px 5px 12px var(--sh-d), -5px -5px 12px var(--sh-l);
+            --nm-inset:     inset 4px 4px 9px var(--sh-d), inset -4px -4px 9px var(--sh-l);
+            --nm-press:     inset 3px 3px 7px var(--sh-d), inset -3px -3px 7px var(--sh-l);
+            --nm-light:     rgba(255,252,246,0.95);
+            --nm-shadow:    rgba(168,158,140,0.55);
 
-            /* ── Glass yüzeyler — koyu zemin için ── */
-            --glass-dark:   rgba(28,28,32,.85);
-            --glass-mid:    rgba(32,32,36,.8);
-            --glass-light:  rgba(36,36,40,.75);
+            /* ── Glass yüzeyler ── */
+            --glass-dark:   rgba(240,235,226,.88);
+            --glass-mid:    rgba(245,240,232,.85);
+            --glass-light:  rgba(250,246,238,.8);
 
-            /* ── Metin ── */
-            --text:         #e8e4de;
-            --text2:        #7a7670;
-            --text3:        #484540;
-            --text-accent:  #c8a84b;
+            /* ── Metin — yüksek kontrast ── */
+            --text:         #1e1a12;
+            --text2:        #4a4032;
+            --text3:        #8a7e6a;
+            --text-accent:  #8a6418;
 
             /* ── Kenarlık ── */
-            --border:       rgba(255,255,255,.05);
-            --border-jade:  rgba(200,168,75,.28);
-            --border-top:   rgba(200,168,75,.2);
+            --border:       rgba(0,0,0,.09);
+            --border-jade:  rgba(160,120,40,.3);
+            --border-top:   rgba(255,255,255,.9);
 
             /* ── Gölgeler ── */
-            --sh1:  0 2px 8px rgba(0,0,0,.5);
-            --sh2:  6px 6px 16px var(--sh-d), -6px -6px 16px var(--sh-l);
-            --sh3:  10px 10px 22px var(--sh-d), -10px -10px 22px var(--sh-l);
-            --sh-jade: 0 6px 24px rgba(200,168,75,.15);
+            --sh1:  0 2px 6px rgba(0,0,0,.1);
+            --sh2:  5px 5px 12px var(--sh-d), -5px -5px 12px var(--sh-l);
+            --sh3:  8px 8px 20px var(--sh-d), -8px -8px 20px var(--sh-l);
+            --sh-jade: 0 4px 16px rgba(160,120,40,.18);
 
             /* ── Blur ── */
             --blur:  blur(24px);
@@ -78,18 +75,18 @@
 
         html, body {
             height: 100%; overflow: hidden;
-            font-family: 'Sora', system-ui, sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg); color: var(--text);
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ── Zemin: index.html ile birebir altın grid ── */
+        /* ── Altın grid zemin — index.html ile aynı ── */
         body::before {
             content: '';
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background-image:
-                linear-gradient(rgba(200,168,75,.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(200,168,75,.04) 1px, transparent 1px);
+                linear-gradient(rgba(160,120,40,.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(160,120,40,.05) 1px, transparent 1px);
             background-size: 44px 44px;
         }
 
@@ -262,8 +259,7 @@
             border-color: var(--border);
             color: var(--text);
             transform: translateX(3px);
-        }
-        .lesson-item.active {
+        }        .lesson-item.active {
             background: var(--jade-frost);
             backdrop-filter: blur(8px);
             border-color: var(--border-jade);
@@ -342,20 +338,20 @@
         .info-card::after {
             content: '';
             position: absolute; top: 0; left: 25%; right: 20%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.7), transparent);
         }
 
         #lesson-body {
-            font-size: .97rem; line-height: 1.9; color: var(--text2);
+            font-size: 1rem; line-height: 1.95; color: var(--text);
             position: relative; z-index: 1;
         }
-        #lesson-body p { margin: 0 0 .85rem; }
+        #lesson-body p { margin: 0 0 .9rem; }
         #lesson-body p:last-child { margin-bottom: 0; }
-        #lesson-body strong { color: var(--text); font-weight: 600; }
-        #lesson-body em { color: var(--text-accent); font-style: normal; }
+        #lesson-body strong { color: var(--text); font-weight: 700; }
+        #lesson-body em { color: var(--text-accent); font-style: normal; font-weight: 500; }
         #lesson-body ul, #lesson-body ol {
-            margin: .35rem 0 .85rem 1.3rem; line-height: 2;
-            font-size: .93rem; color: var(--text2);
+            margin: .35rem 0 .9rem 1.3rem; line-height: 2.05;
+            font-size: .96rem; color: var(--text);
         }
 
         .highlight {
@@ -472,14 +468,14 @@
         }
 
         #btn-next {
-            background: linear-gradient(135deg, var(--jade) 0%, var(--jade-mid) 100%);
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
             color: #fff; font-weight: 600;
-            border: 1px solid var(--border-jade);
-            box-shadow: 0 4px 16px rgba(77,155,116,.35), inset 0 1px 0 rgba(255,255,255,.12);
+            border: 1px solid var(--gold-border);
+            box-shadow: 0 4px 14px rgba(160,120,40,.3), inset 0 1px 0 rgba(255,255,255,.2);
         }
         #btn-next:hover {
-            background: linear-gradient(135deg, var(--jade-mid) 0%, var(--jade-bright) 100%);
-            box-shadow: 0 8px 28px rgba(77,155,116,.45), 0 0 20px rgba(77,155,116,.2), inset 0 1px 0 rgba(255,255,255,.15);
+            background: linear-gradient(135deg, var(--gold2) 0%, #d4b455 100%);
+            box-shadow: 0 8px 24px rgba(160,120,40,.38), inset 0 1px 0 rgba(255,255,255,.25);
             transform: translateY(-2px);
         }
         #btn-next:active {
@@ -487,14 +483,14 @@
             box-shadow: var(--sh1);
         }
 
-        button:disabled { opacity: .2; cursor: not-allowed; pointer-events: none; }
+        button:disabled { opacity: .25; cursor: not-allowed; pointer-events: none; }
 
         /* ════════════════════════════════
            MODAL
         ════════════════════════════════ */
         #complete-screen {
             position: fixed; inset: 0; z-index: 1000;
-            background: rgba(10,14,11,.75);
+            background: rgba(242,237,230,.75);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             display: none; align-items: center; justify-content: center;
