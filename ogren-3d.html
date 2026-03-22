@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go Öğren 3D – Antalya GO</title>
+    <title>Go Öğren – Antalya GO</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-main: #f0f2f5;
             --panel-white: #ffffff;
-            --accent-green: #a8d5ba; /* Resimdeki soft yeşil */
+            --accent-green: #a8d5ba;
             --accent-green-dark: #8ebf9f;
             --text-main: #2d2e32;
             --text-muted: #6b7280;
-            --btn-dark: #2d2e32; /* Resimdeki koyu buton rengi */
+            --btn-dark: #2d2e32;
             --radius-lg: 20px;
             --radius-sm: 12px;
             --shadow-soft: 0 10px 30px rgba(0,0,0,0.03);
@@ -37,85 +37,95 @@
         }
 
         .logo-area { display: flex; align-items: center; gap: 15px; }
-        .logo-area a { text-decoration: none; color: var(--text-muted); font-size: 1.4rem; font-weight: 300; }
-        h1 { margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
+        .logo-area a { text-decoration: none; color: var(--text-muted); font-size: 1.4rem; }
+        h1 { margin: 0; font-size: 1.1rem; font-weight: 600; }
 
-        .lang-switch span {
-            margin-left: 15px; font-size: 0.85rem; font-weight: 600;
-            color: var(--text-muted); cursor: pointer; transition: 0.2s;
-        }
-        .lang-switch span.active { color: var(--accent-green-dark); border-bottom: 2px solid var(--accent-green); }
+        .progress-container { display: flex; align-items: center; gap: 15px; }
+        .prog-bar-bg { width: 120px; height: 8px; background: #eee; border-radius: 10px; overflow: hidden; }
+        #prog-fill { height: 100%; background: var(--accent-green); transition: 0.3s; width: 0%; }
+        #prog-text { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
 
         /* Ana Layout */
         .main-wrapper { display: flex; gap: 20px; flex: 1; min-height: 0; }
 
-        /* Sol Panel: Müfredat */
-        .curriculum-card {
-            width: 300px; background: var(--panel-white);
+        /* Sol Panel */
+        .side-panel {
+            width: 320px; background: var(--panel-white);
             border-radius: var(--radius-lg); box-shadow: var(--shadow-soft);
             display: flex; flex-direction: column; padding: 25px;
         }
 
-        .curriculum-card h3 {
+        .side-panel h3 {
             font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);
-            letter-spacing: 1.5px; margin: 0 0 20px 0; font-weight: 700;
+            letter-spacing: 1.5px; margin: 0 0 15px 0;
         }
 
-        #lesson-list {
-            list-style: none; padding: 0; margin: 0; overflow-y: auto; flex: 1;
+        #curriculum { overflow-y: auto; flex: 1; }
+        .lesson-item {
+            padding: 12px 15px; margin-bottom: 6px; border-radius: var(--radius-sm);
+            cursor: pointer; font-size: 0.9rem; transition: 0.2s; background: #f9fafb;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .lesson-item.active { background: var(--accent-green); color: white; font-weight: 600; }
+        .lesson-item.done .li-check { color: #4ade80; display: inline; }
+        .li-check { display: none; }
+
+        /* Orta Alan: Tahta ve Açıklama */
+        .board-container {
+            flex: 1; display: flex; flex-direction: column; gap: 20px;
         }
 
-        #lesson-list li {
-            padding: 14px 18px; margin-bottom: 8px; border-radius: var(--radius-sm);
-            cursor: pointer; font-size: 0.95rem; transition: 0.2s; color: #4b5563;
-            background: #f9fafb;
+        .board-card {
+            flex: 1; background: var(--panel-white); border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft); position: relative;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
         }
 
-        #lesson-list li:hover { background: #f0f2f5; }
-        #lesson-list li.active { background: var(--accent-green); color: white; font-weight: 600; }
-
-        /* Sağ Alan: Canvas ve Kontroller */
-        .viewport-container { flex: 1; display: flex; flex-direction: column; gap: 20px; }
-
-        #canvas-frame {
-            flex: 1; background: #ffffff; border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-soft); position: relative; overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.01);
+        canvas#goban {
+            max-width: 100%; max-height: 100%; cursor: crosshair;
+            border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        /* Alt Kontrol Barı */
-        .control-bar {
+        /* Bilgi Kutusu */
+        .info-card {
             background: var(--panel-white); border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-soft); padding: 15px 30px;
+            padding: 20px 30px; box-shadow: var(--shadow-soft);
+        }
+        #lesson-body { font-size: 1rem; line-height: 1.6; color: #4b5563; }
+        #lesson-body p { margin: 0 0 10px 0; }
+        .highlight { background: #fffbeb; border-left: 4px solid #f6ad55; padding: 10px; margin: 10px 0; font-size: 0.9rem; }
+
+        /* Alt Kontroller */
+        .control-bar {
             display: flex; justify-content: space-between; align-items: center;
+            background: var(--panel-white); padding: 15px 30px;
+            border-radius: var(--radius-lg); box-shadow: var(--shadow-soft);
         }
 
-        .board-sizes { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: var(--text-muted); }
-        .size-pill {
-            padding: 7px 16px; background: #f3f4f6; border-radius: 20px;
-            text-decoration: none; color: inherit; transition: 0.2s; font-weight: 500;
-        }
-        .size-pill.active { background: var(--accent-green); color: white; }
+        .feedback-box { display: flex; align-items: center; gap: 10px; font-weight: 500; font-size: 0.9rem; }
+        .feedback-box.correct { color: #16a34a; }
+        .feedback-box.wrong { color: #dc2626; }
+        .feedback-box.info { color: var(--text-muted); }
 
-        .action-btns { display: flex; gap: 12px; }
+        .nav-btns { display: flex; gap: 12px; align-items: center; }
         button {
-            border: none; padding: 12px 24px; border-radius: 30px;
-            font-family: inherit; font-weight: 500; cursor: pointer; transition: 0.2s;
-            font-size: 0.9rem;
+            border: none; padding: 10px 22px; border-radius: 30px;
+            font-family: inherit; font-weight: 600; cursor: pointer; transition: 0.2s;
         }
-        .btn-secondary { background: #f3f4f6; color: var(--text-main); }
-        .btn-primary { background: var(--btn-dark); color: white; }
-        .btn-primary:hover { background: #45474d; transform: translateY(-1px); }
+        button:disabled { opacity: 0.3; cursor: not-allowed; }
+        #btn-prev { background: #f3f4f6; color: var(--text-main); }
+        #btn-next { background: var(--btn-dark); color: white; }
 
-        .footer-hint { text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: -10px; opacity: 0.7; }
-
-        /* Tebrik Popup */
-        #congrats-modal {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; padding: 40px; border-radius: 30px; text-align: center;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.1); display: none; z-index: 100;
-            border: 1px solid var(--accent-green);
+        /* Tebrik Ekranı */
+        #complete-screen {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
         }
+        #complete-screen.show { display: flex; }
+        .modal { background: white; padding: 40px; border-radius: 30px; text-align: center; max-width: 400px; }
+
+        /* Sayfa başlığı altındaki ufak künyeler */
+        #chapter-tag { font-size: 0.7rem; color: var(--accent-green-dark); font-weight: 700; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -123,52 +133,57 @@
     <header>
         <div class="logo-area">
             <a href="index.html">←</a>
-            <h1>Antalya GO <span style="font-weight: 400; color: var(--text-muted); margin-left: 5px;">| 3D Öğren</span></h1>
+            <div>
+                <div id="chapter-tag">BÖLÜM 1</div>
+                <h1 id="lesson-title">Yükleniyor...</h1>
+            </div>
         </div>
-        <div class="lang-switch">
-            <span class="active">TR</span>
-            <span>EN</span>
-            <span>RU</span>
+        <div class="progress-container">
+            <div class="prog-bar-bg"><div id="prog-fill"></div></div>
+            <div id="prog-text">0 / 0</div>
         </div>
     </header>
 
     <div class="main-wrapper">
-        <aside class="curriculum-card">
+        <aside class="side-panel">
             <h3>Müfredat</h3>
-            <ul id="lesson-list">
-                </ul>
+            <div id="curriculum">
+                </div>
         </aside>
 
-        <main class="viewport-container">
-            <div id="canvas-frame">
-                <div id="congrats-modal">
-                    <h2 style="margin-top:0; color: var(--accent-green-dark);">🎉 Tebrikler!</h2>
-                    <p>Harika gidiyorsun! Bu bölümü tamamladın.</p>
-                    <button class="btn-primary" onclick="nextLesson()">Devam Et →</button>
-                </div>
+        <main class="board-container">
+            <div class="board-card">
+                <canvas id="goban"></canvas>
+            </div>
+
+            <div class="info-card">
+                <div id="lesson-body">
+                    </div>
             </div>
 
             <div class="control-bar">
-                <div class="board-sizes">
-                    <span>Tahta:</span>
-                    <a href="#" class="size-pill active" onclick="changeSize(9)">9×9</a>
-                    <a href="#" class="size-pill" onclick="changeSize(13)">13×13</a>
-                    <a href="#" class="size-pill" onclick="changeSize(19)">19×19</a>
+                <div id="feedback" class="feedback-box info">
+                    <span class="fb-icon">💡</span>
+                    <span id="fb-text">Tahtayı inceleyin.</span>
                 </div>
 
-                <div class="action-btns">
-                    <button class="btn-secondary" onclick="resetCamera()">⟳ Döndür</button>
-                    <button class="btn-primary" onclick="prevStep()">← Geri</button>
-                    <button class="btn-primary" onclick="nextStep()">İleri →</button>
+                <div class="nav-btns">
+                    <span id="step-counter" style="font-size: 0.8rem; color: var(--text-muted); margin-right: 10px;">Adım 1/1</span>
+                    <button id="btn-prev" onclick="prevStep()">Geri</button>
+                    <button id="btn-next" onclick="nextStep()">İleri →</button>
                 </div>
-            </div>
-            <div class="footer-hint">
-                Sol Tık: Hamle | Sürükle: Döndür | Tekerlek: Yakınlaş
             </div>
         </main>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <div id="complete-screen">
+        <div class="modal">
+            <h2 style="color: var(--accent-green-dark)">🎊 Harika!</h2>
+            <p id="complete-msg">Bölümü tamamladın.</p>
+            <button id="btn-next" onclick="closeComplete()">Sonraki Bölüm</button>
+        </div>
+    </div>
+
     <script src="ogren.js"></script>
 
 </body>
