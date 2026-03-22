@@ -170,40 +170,40 @@ function drawBoard(){
   const cv=document.getElementById('goban'),ctx=cv.getContext('2d');
   const s=cv.width,{m,st}=met(s,boardSize);
 
-  // ── Zemin: ekran görüntüsüne uygun koyu kahverengi ──
-  const base=ctx.createRadialGradient(s*.5,s*.45,s*.05,s*.5,s*.5,s*.78);
-  base.addColorStop(0,'#3a2a12');
-  base.addColorStop(0.45,'#2a1e0c');
-  base.addColorStop(1,'#181008');
-  ctx.fillStyle=base;ctx.fillRect(0,0,s,s);
+  // ── Zemin: parlak, modern krem ──
+  ctx.fillStyle='#f8f0d8';ctx.fillRect(0,0,s,s);
 
-  // Çok ince tahta doku — neredeyse görünmez yatay damarlar
-  for(let i=0;i<14;i++){
-    const y0=(s/14)*i+Math.random()*8;
-    ctx.beginPath();ctx.moveTo(0,y0);
-    for(let x=0;x<=s;x+=6){ctx.lineTo(x,y0+Math.sin(x*.009+i*.7)*st*.08);}
-    ctx.strokeStyle=`rgba(180,120,20,${0.025+Math.random()*0.02})`;
-    ctx.lineWidth=0.5+Math.random()*.8;ctx.stroke();
-  }
+  // Çok yumuşak radyal ışık — ortadan kenara soluklaşma
+  const glow=ctx.createRadialGradient(s*.42,s*.38,0,s*.5,s*.5,s*.72);
+  glow.addColorStop(0,'rgba(255,252,235,.7)');
+  glow.addColorStop(0.6,'rgba(255,244,210,.2)');
+  glow.addColorStop(1,'rgba(200,175,110,.18)');
+  ctx.fillStyle=glow;ctx.fillRect(0,0,s,s);
 
-  // ── Izgara çizgileri — altın sarısı ──
-  ctx.strokeStyle='rgba(200,140,30,.75)';ctx.lineWidth=.85;
+  // Minimal kenar karartma
+  const vign=ctx.createRadialGradient(s/2,s/2,s*.32,s/2,s/2,s*.72);
+  vign.addColorStop(0,'rgba(0,0,0,0)');
+  vign.addColorStop(1,'rgba(120,85,30,.08)');
+  ctx.fillStyle=vign;ctx.fillRect(0,0,s,s);
+
+  // ── Izgara çizgileri — ince, net ──
+  ctx.strokeStyle='rgba(90,60,18,.5)';ctx.lineWidth=.75;
   for(let i=0;i<boardSize;i++){
     const px=m+i*st,py=m+i*st;
     ctx.beginPath();ctx.moveTo(px,m);ctx.lineTo(px,m+(boardSize-1)*st);ctx.stroke();
     ctx.beginPath();ctx.moveTo(m,py);ctx.lineTo(m+(boardSize-1)*st,py);ctx.stroke();
   }
 
-  // ── Hoshi noktaları — altın sarısı dolgu ──
-  ctx.fillStyle='rgba(210,155,35,.85)';
+  // ── Hoshi noktaları ──
+  ctx.fillStyle='rgba(80,52,14,.65)';
   for(const[sx,sy]of stars(boardSize)){
     ctx.beginPath();ctx.arc(m+sx*st,m+sy*st,st*.1,0,Math.PI*2);ctx.fill();
   }
 
-  // ── Koordinat harfleri & sayılar — soluk altın ──
+  // ── Koordinat harfleri & sayılar ──
   const fs=Math.max(8,st*.27);
   ctx.font=`500 ${fs}px 'JetBrains Mono',monospace`;
-  ctx.fillStyle='rgba(190,135,30,.6)';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(110,78,24,.5)';ctx.textAlign='center';ctx.textBaseline='middle';
   for(let i=0;i<boardSize;i++){
     const px=m+i*st;
     ctx.fillText(LTRS[i],px,m*.42);
@@ -217,7 +217,7 @@ function drawBoard(){
     for(let x=0;x<boardSize;x++)
       if(boardGrid[y][x]) drawStone(ctx,m+x*st,m+y*st,st*.46,boardGrid[y][x]);
 
-  // ── Nefes noktası işaretleri — altın sarısı daire ──
+  // ── Nefes noktası işaretleri — altın sarısı ──
   const step=window._curStep||CUR_LESSON?.steps[CUR_STEP];
   if(step?.markers){
     step.markers.forEach(mk=>{
@@ -225,30 +225,28 @@ function drawBoard(){
       const cx=m+mk.x*st,cy=m+mk.y*st,r=st*.2;
       ctx.save();
       const mg=ctx.createRadialGradient(cx-r*.2,cy-r*.2,0,cx,cy,r);
-      mg.addColorStop(0,'rgba(255,210,80,.95)');
-      mg.addColorStop(1,'rgba(190,135,30,.55)');
+      mg.addColorStop(0,'rgba(220,170,40,.95)');
+      mg.addColorStop(1,'rgba(160,110,15,.55)');
       ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
       ctx.fillStyle=mg;ctx.fill();
-      ctx.strokeStyle='rgba(150,100,15,.7)';ctx.lineWidth=st*.04;ctx.stroke();
+      ctx.strokeStyle='rgba(120,80,10,.65)';ctx.lineWidth=st*.04;ctx.stroke();
       ctx.beginPath();ctx.arc(cx-r*.28,cy-r*.3,r*.2,0,Math.PI*2);
-      ctx.fillStyle='rgba(255,248,200,.55)';ctx.fill();
+      ctx.fillStyle='rgba(255,245,180,.6)';ctx.fill();
       ctx.restore();
     });
   }
 
-  // ── Yasak nokta işaretleri (kırmızı X kalkanı) ──
+  // ── Yasak nokta işaretleri ──
   if(step?.forbidden){
     step.forbidden.forEach(mk=>{
       if(!inB(mk.x,mk.y,boardSize))return;
       const cx=m+mk.x*st,cy=m+mk.y*st,r=st*.22;
       ctx.save();
-      // Arka dolgu
       ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-      ctx.fillStyle='rgba(200,40,30,.18)';ctx.fill();
-      ctx.strokeStyle='rgba(200,50,40,.85)';ctx.lineWidth=st*.07;ctx.stroke();
-      // Çarpı
+      ctx.fillStyle='rgba(200,40,30,.15)';ctx.fill();
+      ctx.strokeStyle='rgba(190,45,35,.8)';ctx.lineWidth=st*.07;ctx.stroke();
       const d=r*.62;ctx.lineWidth=st*.1;ctx.lineCap='round';
-      ctx.strokeStyle='rgba(220,60,50,.95)';
+      ctx.strokeStyle='rgba(210,55,45,.9)';
       ctx.beginPath();ctx.moveTo(cx-d,cy-d);ctx.lineTo(cx+d,cy+d);ctx.stroke();
       ctx.beginPath();ctx.moveTo(cx+d,cy-d);ctx.lineTo(cx-d,cy+d);ctx.stroke();
       ctx.restore();
