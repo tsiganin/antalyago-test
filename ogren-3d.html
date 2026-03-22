@@ -7,26 +7,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Resimden çıkarılan renk paleti */
-            --bg:          #f2f2f0;
-            --bg2:         #ebebea;
-            --white:       #ffffff;
-            --sage:        #c8d9c0;
-            --sage-mid:    #b2c9a8;
-            --sage-dark:   #8aaa80;
-            --sage-soft:   rgba(184,212,184,.18);
-            --sage-glass:  rgba(184,212,184,.28);
-            --text:        #2a2a28;
-            --text2:       #888884;
-            --text3:       #bbbbb8;
-            --pill-dark:   #1e1e1c;
-            --border:      rgba(0,0,0,.06);
-            --border-sage: rgba(138,170,128,.25);
-            --shadow-soft: 0 2px 12px rgba(0,0,0,.06);
-            --shadow-card: 0 4px 20px rgba(0,0,0,.05);
-            --r:           20px;
-            --r2:          12px;
-            --r3:          30px;
+            --bg:           #eef0eb;
+            --bg2:          #e4e7e0;
+            --white:        rgba(255,255,255,.82);
+            --white-solid:  #ffffff;
+            --sage:         #c2d4b8;
+            --sage-mid:     #a8c09a;
+            --sage-dark:    #6e9060;
+            --sage-glow:    rgba(168,192,154,.35);
+            --sage-glass:   rgba(194,212,184,.22);
+            --sage-frost:   rgba(194,212,184,.38);
+            --text:         #232820;
+            --text2:        #7a8074;
+            --text3:        #b4b8ae;
+            --pill:         #1c201a;
+            --border:       rgba(0,0,0,.055);
+            --border-sage:  rgba(110,144,96,.2);
+            --border-white: rgba(255,255,255,.7);
+            --sh1:          0 2px 8px  rgba(0,0,0,.06);
+            --sh2:          0 8px 32px rgba(0,0,0,.08);
+            --sh3:          0 20px 60px rgba(0,0,0,.12);
+            --sh-sage:      0 8px 24px rgba(110,144,96,.18);
+            --blur:         blur(20px);
+            --blur2:        blur(32px);
+            --r:            22px;
+            --r2:           13px;
+            --r3:           34px;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,170 +44,261 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Çok hafif doku */
+        /* ── Mesh gradient zemin ── */
         body::before {
             content: '';
             position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background-image:
-                radial-gradient(ellipse at 70% 10%, rgba(184,212,184,.2) 0%, transparent 50%),
-                radial-gradient(ellipse at 10% 90%, rgba(184,212,184,.12) 0%, transparent 45%);
+            background:
+                radial-gradient(ellipse 60% 50% at 75% 15%, rgba(168,192,154,.28) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 45% at 15% 85%, rgba(168,192,154,.18) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 35% at 50% 50%, rgba(255,255,255,.35) 0%, transparent 60%);
         }
 
-        /* ── SAYFA ── */
+        /* Subtle goban lines */
+        body::after {
+            content: '';
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(110,144,96,.032) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(110,144,96,.032) 1px, transparent 1px);
+            background-size: 38px 38px;
+        }
+
         .page {
             position: relative; z-index: 1;
             height: 100vh;
             display: flex; flex-direction: column;
-            padding: 16px; gap: 12px;
+            padding: 14px; gap: 11px;
         }
 
-        /* ════════════════════
+        /* ════════════════════════════════
+           GLASS MIXIN — tekrar eden pattern
+        ════════════════════════════════ */
+        .glass {
+            background: var(--white);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--border-white);
+            box-shadow: var(--sh2), inset 0 1px 0 rgba(255,255,255,.9);
+        }
+
+        /* ════════════════════════════════
            HEADER
-        ════════════════════ */
+        ════════════════════════════════ */
         header {
             flex-shrink: 0;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 22px; height: 60px;
-            background: var(--white);
+            padding: 0 22px; height: 58px;
+            background: rgba(255,255,255,.75);
+            backdrop-filter: var(--blur2);
+            -webkit-backdrop-filter: var(--blur2);
+            border: 1px solid rgba(255,255,255,.85);
             border-radius: var(--r3);
-            box-shadow: var(--shadow-soft);
+            box-shadow: var(--sh2), inset 0 1px 0 rgba(255,255,255,.95);
             animation: fadeDown .5s ease both;
+            transition: box-shadow .3s;
+        }
+        header:hover {
+            box-shadow: var(--sh3), inset 0 1px 0 rgba(255,255,255,.95);
         }
 
-        .hdr-left { display: flex; align-items: center; gap: 16px; }
+        .hdr-left { display: flex; align-items: center; gap: 14px; }
 
         .back-link {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: var(--bg2); border: none;
+            width: 33px; height: 33px; border-radius: 50%;
+            background: rgba(255,255,255,.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,.8);
+            box-shadow: 0 2px 8px rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.9);
             display: flex; align-items: center; justify-content: center;
-            text-decoration: none; color: var(--text2); font-size: .9rem;
-            transition: all .2s;
+            text-decoration: none; color: var(--text2); font-size: .88rem;
+            transition: all .22s;
         }
-        .back-link:hover { background: var(--sage-soft); color: var(--text); }
+        .back-link:hover {
+            background: var(--sage-glass);
+            border-color: var(--border-sage);
+            color: var(--sage-dark);
+            box-shadow: var(--sh-sage), inset 0 1px 0 rgba(255,255,255,.7);
+            transform: translateY(-1px);
+        }
+        .back-link:active { transform: translateY(0) scale(.96); }
 
         .hdr-sep { width: 1px; height: 20px; background: var(--border); }
 
         #chapter-tag {
-            display: block; font-size: .6rem; font-weight: 600;
-            letter-spacing: .15em; text-transform: uppercase;
-            color: var(--sage-dark); margin-bottom: 2px;
+            display: block; font-size: .6rem; font-weight: 700;
+            letter-spacing: .16em; text-transform: uppercase;
+            color: var(--sage-dark); margin-bottom: 1px;
         }
         #lesson-title {
             font-size: .9rem; font-weight: 600; color: var(--text);
             letter-spacing: -.01em;
         }
 
-        /* Progress */
         .prog-wrap { display: flex; align-items: center; gap: 10px; }
-        #prog-text { font-size: .72rem; font-weight: 500; color: var(--text2); min-width: 36px; text-align: right; }
+        #prog-text { font-size: .7rem; font-weight: 500; color: var(--text2); min-width: 34px; text-align: right; }
         .prog-track {
-            width: 90px; height: 4px; border-radius: 4px;
-            background: var(--bg2); overflow: hidden;
+            width: 88px; height: 4px; border-radius: 4px;
+            background: rgba(0,0,0,.08); overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,.08);
         }
-        #prog-fill { height: 100%; width: 0%; border-radius: 4px; background: var(--sage-mid); transition: width .5s ease; }
+        #prog-fill {
+            height: 100%; width: 0%; border-radius: 4px;
+            background: linear-gradient(90deg, var(--sage-mid), var(--sage-dark));
+            transition: width .5s ease;
+            box-shadow: 0 0 6px var(--sage-glow);
+        }
 
-        /* ════════════════════
+        /* ════════════════════════════════
            MAIN
-        ════════════════════ */
+        ════════════════════════════════ */
         .main-wrap {
             flex: 1; min-height: 0;
-            display: flex; gap: 12px;
+            display: flex; gap: 11px;
             animation: fadeUp .5s .1s ease both;
         }
 
-        /* ════════════════════
+        /* ════════════════════════════════
            SIDEBAR
-        ════════════════════ */
+        ════════════════════════════════ */
         .sidebar {
-            width: 206px; flex-shrink: 0;
-            background: var(--white);
+            width: 204px; flex-shrink: 0;
+            background: rgba(255,255,255,.68);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid rgba(255,255,255,.82);
             border-radius: var(--r);
-            box-shadow: var(--shadow-card);
-            display: flex; flex-direction: column;
-            overflow: hidden;
+            box-shadow: var(--sh2), inset 0 1px 0 rgba(255,255,255,.9);
+            display: flex; flex-direction: column; overflow: hidden;
+            transition: box-shadow .3s, transform .3s;
+        }
+        .sidebar:hover {
+            box-shadow: var(--sh3), inset 0 1px 0 rgba(255,255,255,.9);
+            transform: translateY(-1px);
         }
 
         .sidebar-hdr {
-            padding: 16px 16px 10px;
-            font-size: .6rem; font-weight: 700;
-            letter-spacing: .18em; text-transform: uppercase;
+            padding: 15px 15px 9px;
+            font-size: .58rem; font-weight: 700;
+            letter-spacing: .2em; text-transform: uppercase;
             color: var(--text3); flex-shrink: 0;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(0,0,0,.05);
+            background: rgba(255,255,255,.3);
         }
 
-        #curriculum { flex: 1; overflow-y: auto; padding: 8px; }
+        #curriculum { flex: 1; overflow-y: auto; padding: 7px; }
         #curriculum::-webkit-scrollbar { width: 3px; }
-        #curriculum::-webkit-scrollbar-thumb { background: var(--bg2); border-radius: 3px; }
+        #curriculum::-webkit-scrollbar-thumb { background: rgba(0,0,0,.08); border-radius: 3px; }
 
-        /* JS buildSidebar() class'ları */
-        .chapter { margin-bottom: 4px; }
+        .chapter { margin-bottom: 3px; }
 
         .chapter-title {
             display: flex; align-items: center; justify-content: space-between;
             padding: 8px 10px; border-radius: var(--r2);
-            font-size: .75rem; font-weight: 600; cursor: pointer;
-            color: var(--text2); transition: all .15s; user-select: none;
+            font-size: .74rem; font-weight: 600; cursor: pointer;
+            color: var(--text2); transition: all .2s; user-select: none;
+            border: 1px solid transparent;
         }
-        .chapter-title:hover { background: var(--bg); color: var(--text); }
+        .chapter-title:hover {
+            background: rgba(255,255,255,.7);
+            border-color: rgba(255,255,255,.9);
+            color: var(--text);
+            box-shadow: var(--sh1);
+            transform: translateX(2px);
+        }
         .ch-left { display: flex; align-items: center; gap: 8px; }
         .ch-num {
             width: 18px; height: 18px; border-radius: 50%;
-            background: var(--sage-soft); border: 1px solid var(--border-sage);
+            background: rgba(168,192,154,.25);
+            border: 1px solid var(--border-sage);
             color: var(--sage-dark); font-size: .6rem; font-weight: 700;
             display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all .2s;
         }
-        .ch-arrow { font-size: .6rem; color: var(--text3); transition: transform .2s; }
+        .chapter-title:hover .ch-num {
+            background: var(--sage-glass);
+            box-shadow: 0 0 8px var(--sage-glow);
+        }
+        .ch-arrow { font-size: .58rem; color: var(--text3); transition: transform .2s; }
         .chapter-title.open .ch-arrow { transform: rotate(90deg); }
 
-        .lesson-list { display: none; flex-direction: column; padding: 2px 0 2px 6px; }
+        .lesson-list { display: none; flex-direction: column; padding: 2px 0 2px 5px; }
         .lesson-list.open { display: flex; }
 
         .lesson-item {
             display: flex; align-items: center; gap: 6px;
             padding: 7px 10px; margin: 1px 0;
             border-radius: 10px; cursor: pointer;
-            font-size: .75rem; color: var(--text2);
-            border-left: 2px solid transparent;
-            transition: all .15s;
+            font-size: .74rem; color: var(--text2);
+            border: 1px solid transparent;
+            transition: all .2s;
         }
-        .lesson-item:hover { background: var(--bg); color: var(--text); }
+        .lesson-item:hover {
+            background: rgba(255,255,255,.75);
+            border-color: rgba(255,255,255,.9);
+            color: var(--text);
+            box-shadow: var(--sh1);
+            transform: translateX(3px);
+        }
         .lesson-item.active {
-            background: var(--sage-soft); color: var(--sage-dark);
-            border-left-color: var(--sage-mid); font-weight: 600;
+            background: var(--sage-frost);
+            backdrop-filter: blur(8px);
+            border-color: var(--border-sage);
+            color: var(--sage-dark); font-weight: 600;
+            box-shadow: var(--sh-sage), inset 0 1px 0 rgba(255,255,255,.6);
+            transform: translateX(3px);
         }
-        .lesson-item.done { color: var(--sage-dark); }
+        .lesson-item.done { color: var(--sage-mid); }
         .lesson-item.done .li-check { display: inline; }
         .li-check { display: none; font-size: .6rem; }
-        .li-num { font-size: .62rem; opacity: .5; min-width: 20px; }
+        .li-num { font-size: .6rem; opacity: .45; min-width: 18px; }
 
-        /* ════════════════════
+        /* ════════════════════════════════
            CONTENT
-        ════════════════════ */
+        ════════════════════════════════ */
         .content-area {
             flex: 1; min-width: 0;
-            display: flex; flex-direction: column; gap: 12px;
+            display: flex; flex-direction: column; gap: 11px;
         }
 
-        .mid-row {
-            flex: 1; min-height: 0;
-            display: flex; gap: 12px;
-        }
+        .mid-row { flex: 1; min-height: 0; display: flex; gap: 11px; }
 
         /* ── TAHTA KARTI ── */
         .board-card {
             aspect-ratio: 1; max-height: 100%; flex-shrink: 0;
-            background: var(--white);
+            background: rgba(255,255,255,.72);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid rgba(255,255,255,.88);
             border-radius: var(--r);
-            box-shadow: var(--shadow-card);
+            box-shadow:
+                var(--sh2),
+                inset 0 1px 0 rgba(255,255,255,.95),
+                inset 0 -1px 0 rgba(0,0,0,.03);
             display: flex; align-items: center; justify-content: center;
             padding: 14px; overflow: hidden; position: relative;
+            transition: box-shadow .3s, transform .3s;
+        }
+        .board-card:hover {
+            box-shadow:
+                var(--sh3),
+                0 0 30px rgba(168,192,154,.15),
+                inset 0 1px 0 rgba(255,255,255,.95);
+            transform: translateY(-2px) scale(1.005);
         }
 
-        /* Sage yeşil iç hale — tıpkı resimdeki circular gauge */
+        /* Üst parlak kenar — 3D his */
+        .board-card::before {
+            content: '';
+            position: absolute; top: 0; left: 12%; right: 12%; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent);
+        }
+
+        /* Sage glow iç yansıma */
         .board-card::after {
             content: '';
             position: absolute; inset: 0; border-radius: var(--r);
-            background: radial-gradient(ellipse at 60% 40%, rgba(184,212,184,.15) 0%, transparent 65%);
+            background: radial-gradient(ellipse 55% 45% at 65% 35%, rgba(168,192,154,.12) 0%, transparent 65%);
             pointer-events: none;
         }
 
@@ -210,75 +307,121 @@
         /* ── AÇIKLAMA KARTI ── */
         .info-card {
             flex: 1; min-width: 0;
-            /* Resimdeki sağ panel: sage yeşili frosted */
-            background: var(--sage-glass);
-            border: 1px solid var(--border-sage);
+            background: var(--sage-frost);
+            backdrop-filter: var(--blur2);
+            -webkit-backdrop-filter: var(--blur2);
+            border: 1px solid rgba(255,255,255,.72);
             border-radius: var(--r);
-            box-shadow: var(--shadow-soft);
+            box-shadow:
+                var(--sh2),
+                inset 0 1px 0 rgba(255,255,255,.85),
+                inset 1px 0 0 rgba(255,255,255,.5);
             padding: 22px 24px;
             overflow-y: auto;
             display: flex; flex-direction: column; gap: .8rem;
             position: relative;
+            transition: box-shadow .3s, transform .3s;
         }
+        .info-card:hover {
+            box-shadow:
+                var(--sh3),
+                0 0 24px var(--sage-glow),
+                inset 0 1px 0 rgba(255,255,255,.85);
+            transform: translateY(-1px);
+        }
+        .info-card::-webkit-scrollbar { width: 3px; }
+        .info-card::-webkit-scrollbar-thumb { background: rgba(110,144,96,.18); border-radius: 3px; }
 
-        /* Frosted overlay */
+        /* Frosted beyaz overlay */
         .info-card::before {
             content: '';
             position: absolute; inset: 0; border-radius: var(--r);
-            background: rgba(255,255,255,.45);
+            background: rgba(255,255,255,.42);
             pointer-events: none;
         }
 
+        /* Sağ üst köşe parlak nokta */
+        .info-card::after {
+            content: '';
+            position: absolute; top: -1px; right: 30px; left: 30%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.9), transparent);
+        }
+
         #lesson-body {
-            font-size: .88rem; line-height: 1.78;
-            color: rgba(42,42,40,.75);
+            font-size: .87rem; line-height: 1.8; color: rgba(35,40,32,.72);
             position: relative; z-index: 1;
         }
         #lesson-body p { margin: 0 0 .7rem; }
         #lesson-body p:last-child { margin-bottom: 0; }
         #lesson-body strong { color: var(--text); font-weight: 600; }
         #lesson-body em { color: var(--sage-dark); font-style: normal; }
-        #lesson-body ul, #lesson-body ol { margin: .3rem 0 .7rem 1.2rem; line-height: 1.9; font-size: .84rem; }
+        #lesson-body ul, #lesson-body ol { margin: .3rem 0 .7rem 1.2rem; line-height: 1.9; font-size: .83rem; }
 
         .highlight {
-            background: rgba(255,255,255,.6);
-            border-left: 2.5px solid var(--sage-mid);
+            background: rgba(255,255,255,.55);
+            backdrop-filter: blur(6px);
+            border-left: 2px solid var(--sage-mid);
             padding: 10px 14px; margin: .5rem 0;
             border-radius: 0 10px 10px 0;
-            font-size: .84rem; line-height: 1.65; color: var(--text);
+            font-size: .83rem; line-height: 1.65; color: var(--text);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
             position: relative; z-index: 1;
         }
 
         .term {
             display: inline-block;
-            background: rgba(255,255,255,.7);
+            background: rgba(255,255,255,.65);
+            backdrop-filter: blur(4px);
             border: 1px solid var(--border-sage);
-            border-radius: 6px; padding: .04rem .38rem;
+            border-radius: 6px; padding: .04rem .36rem;
             font-family: 'JetBrains Mono', monospace;
-            font-size: .76rem; color: var(--sage-dark); font-weight: 500;
+            font-size: .75rem; color: var(--sage-dark); font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06);
+            position: relative; z-index: 1;
         }
 
-        /* ════════════════════
+        /* ════════════════════════════════
            FOOTER
-        ════════════════════ */
+        ════════════════════════════════ */
         .footer-bar {
             flex-shrink: 0;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 22px; height: 56px;
-            background: var(--white);
+            padding: 0 22px; height: 54px;
+            background: rgba(255,255,255,.75);
+            backdrop-filter: var(--blur2);
+            -webkit-backdrop-filter: var(--blur2);
+            border: 1px solid rgba(255,255,255,.88);
             border-radius: var(--r3);
-            box-shadow: var(--shadow-soft);
+            box-shadow: var(--sh2), inset 0 1px 0 rgba(255,255,255,.95);
+            transition: box-shadow .3s;
+        }
+        .footer-bar:hover {
+            box-shadow: var(--sh3), inset 0 1px 0 rgba(255,255,255,.95);
         }
 
         /* feedback */
         .feedback-box {
             display: flex; align-items: center; gap: 8px;
-            font-size: .82rem; font-weight: 500;
+            font-size: .81rem; font-weight: 500;
+            padding: 6px 14px; border-radius: 30px;
+            transition: all .25s;
         }
-        .feedback-box.info    { color: var(--text2); }
-        .feedback-box.correct { color: var(--sage-dark); }
-        .feedback-box.wrong   { color: #d07060; }
-        .feedback-box .fb-icon { font-size: .95rem; }
+        .feedback-box.info {
+            color: var(--text2); background: transparent;
+        }
+        .feedback-box.correct {
+            color: var(--sage-dark);
+            background: rgba(168,192,154,.18);
+            border: 1px solid var(--border-sage);
+            box-shadow: 0 0 12px var(--sage-glow);
+        }
+        .feedback-box.wrong {
+            color: #b05a48;
+            background: rgba(176,90,72,.08);
+            border: 1px solid rgba(176,90,72,.18);
+        }
+        .feedback-box .fb-icon { font-size: .92rem; }
 
         @keyframes shake {
             0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)}
@@ -287,89 +430,114 @@
 
         .nav-right { display: flex; align-items: center; gap: 10px; }
 
-        /* Step dots */
         #step-dots { display: flex; gap: 5px; align-items: center; }
         .sdot {
             width: 6px; height: 6px; border-radius: 50%;
-            background: var(--bg2); cursor: pointer; transition: all .2s;
+            background: rgba(0,0,0,.1); cursor: pointer; transition: all .22s;
         }
-        .sdot.active { background: var(--sage-mid); transform: scale(1.4); }
-        .sdot.done   { background: var(--sage); }
+        .sdot:hover { background: var(--sage); transform: scale(1.2); }
+        .sdot.active {
+            background: var(--sage-mid); transform: scale(1.45);
+            box-shadow: 0 0 6px var(--sage-glow);
+        }
+        .sdot.done { background: var(--sage); }
 
         #step-counter {
-            font-size: .68rem; font-weight: 500; color: var(--text3);
-            font-family: 'JetBrains Mono', monospace; min-width: 48px;
+            font-size: .67rem; font-weight: 500; color: var(--text3);
+            font-family: 'JetBrains Mono', monospace; min-width: 46px;
         }
 
         .nav-sep { width: 1px; height: 18px; background: var(--border); }
 
-        /* Butonlar — resimdeki pill buton tarzı */
         .nav-btn {
-            border: none; height: 34px; padding: 0 18px; border-radius: 34px;
-            font-family: inherit; font-size: .78rem; font-weight: 500;
-            cursor: pointer; transition: all .18s;
+            border: none; height: 33px; padding: 0 17px; border-radius: 33px;
+            font-family: inherit; font-size: .77rem; font-weight: 500;
+            cursor: pointer; transition: all .22s;
             display: flex; align-items: center; gap: 5px;
         }
 
         #btn-prev {
-            background: var(--bg2); color: var(--text2);
+            background: rgba(255,255,255,.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,.85);
+            color: var(--text2);
+            box-shadow: var(--sh1), inset 0 1px 0 rgba(255,255,255,.9);
         }
-        #btn-prev:hover { background: var(--bg); color: var(--text); }
+        #btn-prev:hover {
+            background: rgba(255,255,255,.85);
+            color: var(--text);
+            box-shadow: var(--sh2), inset 0 1px 0 rgba(255,255,255,.95);
+            transform: translateY(-1px);
+        }
+        #btn-prev:active { transform: translateY(0) scale(.97); }
 
-        /* Resimdeki koyu pill buton */
         #btn-next {
-            background: var(--pill-dark); color: #fff; font-weight: 600;
+            background: var(--pill);
+            color: #fff; font-weight: 600;
+            box-shadow: 0 4px 14px rgba(28,32,26,.3), inset 0 1px 0 rgba(255,255,255,.08);
         }
-        #btn-next:hover { background: #2e2e2c; }
-        #btn-next:active { transform: scale(.97); }
+        #btn-next:hover {
+            background: #2c322a;
+            box-shadow: 0 8px 24px rgba(28,32,26,.4), 0 0 16px rgba(110,144,96,.2), inset 0 1px 0 rgba(255,255,255,.1);
+            transform: translateY(-2px);
+        }
+        #btn-next:active { transform: translateY(0) scale(.97); box-shadow: var(--sh1); }
 
-        button:disabled { opacity: .28; cursor: not-allowed; pointer-events: none; }
+        button:disabled { opacity: .25; cursor: not-allowed; pointer-events: none; }
 
-        /* ════════════════════
-           TAMAMLANDI MODAL
-        ════════════════════ */
+        /* ════════════════════════════════
+           MODAL
+        ════════════════════════════════ */
         #complete-screen {
             position: fixed; inset: 0; z-index: 1000;
-            background: rgba(242,242,240,.75);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(238,240,235,.65);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             display: none; align-items: center; justify-content: center;
         }
         #complete-screen.show { display: flex; }
 
         .modal {
-            background: var(--white);
+            background: rgba(255,255,255,.85);
+            backdrop-filter: var(--blur2);
+            -webkit-backdrop-filter: var(--blur2);
+            border: 1px solid rgba(255,255,255,.92);
             border-radius: 28px; padding: 40px 44px; text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,.1);
+            box-shadow: var(--sh3), inset 0 1px 0 rgba(255,255,255,.95);
             max-width: 360px; width: 100%;
             animation: popIn .35s ease both;
         }
         .modal-icon { font-size: 2.8rem; margin-bottom: 14px; }
-        .modal h2 { font-size: 1.3rem; font-weight: 700; color: var(--text); margin: 0 0 10px; }
-        #complete-msg { font-size: .88rem; color: var(--text2); line-height: 1.65; margin: 0 0 24px; }
+        .modal h2 { font-size: 1.25rem; font-weight: 700; color: var(--text); margin: 0 0 10px; }
+        #complete-msg { font-size: .87rem; color: var(--text2); line-height: 1.65; margin: 0 0 24px; }
         .modal-btn {
-            background: var(--pill-dark); color: #fff; border: none;
+            background: var(--pill); color: #fff; border: none;
             padding: 12px 28px; border-radius: 30px;
-            font-family: inherit; font-size: .85rem; font-weight: 600;
-            cursor: pointer; transition: all .18s;
+            font-family: inherit; font-size: .84rem; font-weight: 600;
+            cursor: pointer; transition: all .22s;
+            box-shadow: 0 4px 14px rgba(28,32,26,.25);
         }
-        .modal-btn:hover { background: #2e2e2c; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+        .modal-btn:hover {
+            background: #2c322a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(28,32,26,.35), 0 0 14px rgba(110,144,96,.2);
+        }
+        .modal-btn:active { transform: scale(.97); }
 
         /* ── ANİMASYONLAR ── */
         @keyframes fadeDown {
-            from { opacity: 0; transform: translateY(-10px); }
+            from { opacity: 0; transform: translateY(-12px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(12px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes popIn {
-            from { opacity: 0; transform: scale(.9); }
-            to   { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: scale(.88) translateY(12px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
-        /* ── RESPONSIVE ── */
         @media(max-width: 820px) {
             .sidebar { display: none; }
             .mid-row { flex-direction: column; }
@@ -380,7 +548,6 @@
 <body>
 <div class="page">
 
-    <!-- HEADER -->
     <header>
         <div class="hdr-left">
             <a href="index.html" class="back-link">←</a>
@@ -396,38 +563,27 @@
         </div>
     </header>
 
-    <!-- MAIN -->
     <div class="main-wrap">
-
-        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="sidebar-hdr">Müfredat</div>
             <div id="curriculum"></div>
         </aside>
 
-        <!-- CONTENT -->
         <main class="content-area">
             <div class="mid-row">
-
-                <!-- TAHTA -->
                 <div class="board-card">
                     <canvas id="goban"></canvas>
                 </div>
-
-                <!-- AÇIKLAMA -->
                 <div class="info-card">
                     <div id="lesson-body"></div>
                 </div>
-
             </div>
 
-            <!-- FOOTER -->
             <div class="footer-bar">
                 <div id="feedback" class="feedback-box info">
                     <span class="fb-icon">💡</span>
                     <span id="fb-text">Yükleniyor…</span>
                 </div>
-
                 <div class="nav-right">
                     <div id="step-dots"></div>
                     <span id="step-counter">1 / 1</span>
@@ -436,11 +592,9 @@
                     <button id="btn-next" class="nav-btn" onclick="nextStep()">İleri →</button>
                 </div>
             </div>
-
         </main>
     </div>
 
-    <!-- TAMAMLANDI MODAL -->
     <div id="complete-screen">
         <div class="modal">
             <div class="modal-icon">🎊</div>
@@ -452,5 +606,25 @@
 
     <script src="ogren.js"></script>
 </div>
+
+<script>
+/* Fare hareketine göre 3D tilt efekti — board ve info card */
+document.querySelectorAll('.board-card, .info-card, .sidebar').forEach(el => {
+    el.addEventListener('mousemove', e => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width  - .5;
+        const y = (e.clientY - r.top)  / r.height - .5;
+        const intensity = el.classList.contains('board-card') ? 4 : 2.5;
+        el.style.transform = `perspective(900px) rotateY(${x * intensity}deg) rotateX(${-y * intensity}deg) translateZ(4px)`;
+    });
+    el.addEventListener('mouseleave', () => {
+        el.style.transform = '';
+        el.style.transition = 'transform .5s ease, box-shadow .3s';
+    });
+    el.addEventListener('mouseenter', () => {
+        el.style.transition = 'transform .12s ease, box-shadow .3s';
+    });
+});
+</script>
 </body>
 </html>
