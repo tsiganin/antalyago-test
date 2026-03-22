@@ -7,27 +7,26 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --gold:        #c8a84b;
-            --gold2:       #e0be68;
-            --gold-glow:   rgba(200,168,75,.18);
-            --gold-soft:   rgba(200,168,75,.08);
-            --bg:          #111114;
-            --bg2:         #18181c;
-            --glass:       rgba(255,255,255,.04);
-            --glass-h:     rgba(255,255,255,.07);
-            --glass-b:     rgba(255,255,255,.09);
-            --border:      rgba(255,255,255,.07);
-            --border-h:    rgba(255,255,255,.14);
-            --border-gold: rgba(200,168,75,.25);
-            --text:        #eceae6;
-            --text2:       #7a7670;
-            --text3:       #3e3c38;
-            --green:       #4ade80;
-            --green-soft:  rgba(74,222,128,.12);
-            --red:         #f87171;
-            --r:           16px;
-            --r2:          10px;
-            --blur:        blur(18px);
+            /* Resimden çıkarılan renk paleti */
+            --bg:          #f2f2f0;
+            --bg2:         #ebebea;
+            --white:       #ffffff;
+            --sage:        #c8d9c0;
+            --sage-mid:    #b2c9a8;
+            --sage-dark:   #8aaa80;
+            --sage-soft:   rgba(184,212,184,.18);
+            --sage-glass:  rgba(184,212,184,.28);
+            --text:        #2a2a28;
+            --text2:       #888884;
+            --text3:       #bbbbb8;
+            --pill-dark:   #1e1e1c;
+            --border:      rgba(0,0,0,.06);
+            --border-sage: rgba(138,170,128,.25);
+            --shadow-soft: 0 2px 12px rgba(0,0,0,.06);
+            --shadow-card: 0 4px 20px rgba(0,0,0,.05);
+            --r:           20px;
+            --r2:          12px;
+            --r3:          30px;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,46 +38,33 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* ── Goban ızgara arka plan ── */
+        /* Çok hafif doku */
         body::before {
             content: '';
-            position: fixed; inset: 0; z-index: 0;
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
             background-image:
-                linear-gradient(rgba(200,168,75,.028) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(200,168,75,.028) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
+                radial-gradient(ellipse at 70% 10%, rgba(184,212,184,.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 10% 90%, rgba(184,212,184,.12) 0%, transparent 45%);
         }
 
-        /* Sağ üst ambiyans ışığı */
-        body::after {
-            content: '';
-            position: fixed; top: -180px; right: -180px; z-index: 0;
-            width: 520px; height: 520px; border-radius: 50%;
-            background: radial-gradient(circle, rgba(200,168,75,.07) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        /* ── SAYFA WRAPPER ── */
+        /* ── SAYFA ── */
         .page {
             position: relative; z-index: 1;
             height: 100vh;
             display: flex; flex-direction: column;
-            padding: 14px; gap: 12px;
+            padding: 16px; gap: 12px;
         }
 
-        /* ════════════════════════════════
+        /* ════════════════════
            HEADER
-        ════════════════════════════════ */
+        ════════════════════ */
         header {
             flex-shrink: 0;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; height: 58px;
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border);
-            border-radius: var(--r);
+            padding: 0 22px; height: 60px;
+            background: var(--white);
+            border-radius: var(--r3);
+            box-shadow: var(--shadow-soft);
             animation: fadeDown .5s ease both;
         }
 
@@ -86,22 +72,22 @@
 
         .back-link {
             width: 34px; height: 34px; border-radius: 50%;
-            background: var(--glass); border: 1px solid var(--border);
+            background: var(--bg2); border: none;
             display: flex; align-items: center; justify-content: center;
             text-decoration: none; color: var(--text2); font-size: .9rem;
             transition: all .2s;
         }
-        .back-link:hover { background: var(--glass-h); color: var(--text); border-color: var(--border-h); }
+        .back-link:hover { background: var(--sage-soft); color: var(--text); }
 
-        .hdr-divider { width: 1px; height: 24px; background: var(--border); }
+        .hdr-sep { width: 1px; height: 20px; background: var(--border); }
 
         #chapter-tag {
-            display: block; font-size: .62rem; font-weight: 600;
-            letter-spacing: .14em; text-transform: uppercase; color: var(--gold);
-            margin-bottom: 2px;
+            display: block; font-size: .6rem; font-weight: 600;
+            letter-spacing: .15em; text-transform: uppercase;
+            color: var(--sage-dark); margin-bottom: 2px;
         }
         #lesson-title {
-            font-size: .92rem; font-weight: 600; color: var(--text);
+            font-size: .9rem; font-weight: 600; color: var(--text);
             letter-spacing: -.01em;
         }
 
@@ -109,90 +95,88 @@
         .prog-wrap { display: flex; align-items: center; gap: 10px; }
         #prog-text { font-size: .72rem; font-weight: 500; color: var(--text2); min-width: 36px; text-align: right; }
         .prog-track {
-            width: 100px; height: 4px; border-radius: 4px;
-            background: rgba(255,255,255,.07); overflow: hidden;
+            width: 90px; height: 4px; border-radius: 4px;
+            background: var(--bg2); overflow: hidden;
         }
-        #prog-fill { height: 100%; width: 0%; border-radius: 4px; background: var(--gold); transition: width .5s ease; }
+        #prog-fill { height: 100%; width: 0%; border-radius: 4px; background: var(--sage-mid); transition: width .5s ease; }
 
-        /* ════════════════════════════════
-           MAIN LAYOUT
-        ════════════════════════════════ */
+        /* ════════════════════
+           MAIN
+        ════════════════════ */
         .main-wrap {
             flex: 1; min-height: 0;
             display: flex; gap: 12px;
             animation: fadeUp .5s .1s ease both;
         }
 
-        /* ════════════════════════════════
+        /* ════════════════════
            SIDEBAR
-        ════════════════════════════════ */
+        ════════════════════ */
         .sidebar {
-            width: 210px; flex-shrink: 0;
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border);
+            width: 206px; flex-shrink: 0;
+            background: var(--white);
             border-radius: var(--r);
+            box-shadow: var(--shadow-card);
             display: flex; flex-direction: column;
             overflow: hidden;
         }
 
         .sidebar-hdr {
-            padding: 14px 14px 10px;
+            padding: 16px 16px 10px;
             font-size: .6rem; font-weight: 700;
-            letter-spacing: .16em; text-transform: uppercase;
+            letter-spacing: .18em; text-transform: uppercase;
             color: var(--text3); flex-shrink: 0;
             border-bottom: 1px solid var(--border);
         }
 
         #curriculum { flex: 1; overflow-y: auto; padding: 8px; }
         #curriculum::-webkit-scrollbar { width: 3px; }
-        #curriculum::-webkit-scrollbar-thumb { background: var(--border-h); border-radius: 3px; }
+        #curriculum::-webkit-scrollbar-thumb { background: var(--bg2); border-radius: 3px; }
 
-        /* JS tarafından oluşturulan class'lar */
+        /* JS buildSidebar() class'ları */
         .chapter { margin-bottom: 4px; }
 
         .chapter-title {
             display: flex; align-items: center; justify-content: space-between;
             padding: 8px 10px; border-radius: var(--r2);
-            font-size: .76rem; font-weight: 600; cursor: pointer;
+            font-size: .75rem; font-weight: 600; cursor: pointer;
             color: var(--text2); transition: all .15s; user-select: none;
         }
-        .chapter-title:hover { background: var(--glass-h); color: var(--text); }
+        .chapter-title:hover { background: var(--bg); color: var(--text); }
         .ch-left { display: flex; align-items: center; gap: 8px; }
         .ch-num {
             width: 18px; height: 18px; border-radius: 50%;
-            background: var(--gold-soft); border: 1px solid var(--border-gold);
-            color: var(--gold); font-size: .6rem; font-weight: 700;
+            background: var(--sage-soft); border: 1px solid var(--border-sage);
+            color: var(--sage-dark); font-size: .6rem; font-weight: 700;
             display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .ch-arrow { font-size: .6rem; color: var(--text3); transition: transform .2s; }
         .chapter-title.open .ch-arrow { transform: rotate(90deg); }
 
-        .lesson-list { display: none; flex-direction: column; padding: 2px 0 2px 8px; }
+        .lesson-list { display: none; flex-direction: column; padding: 2px 0 2px 6px; }
         .lesson-list.open { display: flex; }
 
         .lesson-item {
             display: flex; align-items: center; gap: 6px;
             padding: 7px 10px; margin: 1px 0;
-            border-radius: 8px; cursor: pointer;
-            font-size: .76rem; color: var(--text2);
-            border-left: 1.5px solid transparent;
+            border-radius: 10px; cursor: pointer;
+            font-size: .75rem; color: var(--text2);
+            border-left: 2px solid transparent;
             transition: all .15s;
         }
-        .lesson-item:hover { background: var(--glass-h); color: var(--text); }
+        .lesson-item:hover { background: var(--bg); color: var(--text); }
         .lesson-item.active {
-            background: var(--gold-soft); color: var(--gold);
-            border-left-color: var(--gold); font-weight: 600;
+            background: var(--sage-soft); color: var(--sage-dark);
+            border-left-color: var(--sage-mid); font-weight: 600;
         }
-        .lesson-item.done { color: var(--green); }
+        .lesson-item.done { color: var(--sage-dark); }
         .lesson-item.done .li-check { display: inline; }
-        .li-check { display: none; font-size: .65rem; }
+        .li-check { display: none; font-size: .6rem; }
         .li-num { font-size: .62rem; opacity: .5; min-width: 20px; }
 
-        /* ════════════════════════════════
-           CONTENT AREA
-        ════════════════════════════════ */
+        /* ════════════════════
+           CONTENT
+        ════════════════════ */
         .content-area {
             flex: 1; min-width: 0;
             display: flex; flex-direction: column; gap: 12px;
@@ -206,85 +190,94 @@
         /* ── TAHTA KARTI ── */
         .board-card {
             aspect-ratio: 1; max-height: 100%; flex-shrink: 0;
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border);
+            background: var(--white);
             border-radius: var(--r);
+            box-shadow: var(--shadow-card);
             display: flex; align-items: center; justify-content: center;
             padding: 14px; overflow: hidden; position: relative;
         }
 
-        /* Tahta üst kenar altın çizgi */
-        .board-card::before {
+        /* Sage yeşil iç hale — tıpkı resimdeki circular gauge */
+        .board-card::after {
             content: '';
-            position: absolute; top: 0; left: 15%; right: 15%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(200,168,75,.4), transparent);
+            position: absolute; inset: 0; border-radius: var(--r);
+            background: radial-gradient(ellipse at 60% 40%, rgba(184,212,184,.15) 0%, transparent 65%);
+            pointer-events: none;
         }
 
-        #goban { max-width: 100%; max-height: 100%; display: block; touch-action: none; }
+        #goban { max-width: 100%; max-height: 100%; display: block; touch-action: none; position: relative; z-index: 1; }
 
         /* ── AÇIKLAMA KARTI ── */
         .info-card {
             flex: 1; min-width: 0;
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border);
+            /* Resimdeki sağ panel: sage yeşili frosted */
+            background: var(--sage-glass);
+            border: 1px solid var(--border-sage);
             border-radius: var(--r);
+            box-shadow: var(--shadow-soft);
             padding: 22px 24px;
-            overflow-y: auto; display: flex; flex-direction: column; gap: .85rem;
+            overflow-y: auto;
+            display: flex; flex-direction: column; gap: .8rem;
+            position: relative;
         }
-        .info-card::-webkit-scrollbar { width: 3px; }
-        .info-card::-webkit-scrollbar-thumb { background: var(--border-h); border-radius: 3px; }
 
-        #lesson-body { font-size: .88rem; line-height: 1.78; color: rgba(236,234,230,.75); }
+        /* Frosted overlay */
+        .info-card::before {
+            content: '';
+            position: absolute; inset: 0; border-radius: var(--r);
+            background: rgba(255,255,255,.45);
+            pointer-events: none;
+        }
+
+        #lesson-body {
+            font-size: .88rem; line-height: 1.78;
+            color: rgba(42,42,40,.75);
+            position: relative; z-index: 1;
+        }
         #lesson-body p { margin: 0 0 .7rem; }
         #lesson-body p:last-child { margin-bottom: 0; }
         #lesson-body strong { color: var(--text); font-weight: 600; }
-        #lesson-body em { color: var(--gold); font-style: normal; }
+        #lesson-body em { color: var(--sage-dark); font-style: normal; }
         #lesson-body ul, #lesson-body ol { margin: .3rem 0 .7rem 1.2rem; line-height: 1.9; font-size: .84rem; }
-        #lesson-body li { margin-bottom: .2rem; }
 
         .highlight {
-            background: rgba(200,168,75,.06);
-            border-left: 2px solid var(--gold);
+            background: rgba(255,255,255,.6);
+            border-left: 2.5px solid var(--sage-mid);
             padding: 10px 14px; margin: .5rem 0;
-            border-radius: 0 8px 8px 0;
-            font-size: .84rem; line-height: 1.65;
-            color: rgba(236,234,230,.8);
+            border-radius: 0 10px 10px 0;
+            font-size: .84rem; line-height: 1.65; color: var(--text);
+            position: relative; z-index: 1;
         }
 
         .term {
             display: inline-block;
-            background: rgba(200,168,75,.1); border: 1px solid var(--border-gold);
-            border-radius: 4px; padding: .04rem .38rem;
-            font-family: 'JetBrains Mono', monospace; font-size: .76rem;
-            color: var(--gold); font-weight: 500;
+            background: rgba(255,255,255,.7);
+            border: 1px solid var(--border-sage);
+            border-radius: 6px; padding: .04rem .38rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .76rem; color: var(--sage-dark); font-weight: 500;
         }
 
-        /* ════════════════════════════════
-           FOOTER NAVİGASYON
-        ════════════════════════════════ */
+        /* ════════════════════
+           FOOTER
+        ════════════════════ */
         .footer-bar {
             flex-shrink: 0;
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; height: 54px;
-            background: var(--glass);
-            backdrop-filter: var(--blur);
-            -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border);
-            border-radius: var(--r);
+            padding: 0 22px; height: 56px;
+            background: var(--white);
+            border-radius: var(--r3);
+            box-shadow: var(--shadow-soft);
         }
 
-        /* feedback — JS: id="feedback", class="feedback-box info/correct/wrong" */
+        /* feedback */
         .feedback-box {
             display: flex; align-items: center; gap: 8px;
             font-size: .82rem; font-weight: 500;
         }
         .feedback-box.info    { color: var(--text2); }
-        .feedback-box.correct { color: var(--green); }
-        .feedback-box.wrong   { color: var(--red); }
+        .feedback-box.correct { color: var(--sage-dark); }
+        .feedback-box.wrong   { color: #d07060; }
         .feedback-box .fb-icon { font-size: .95rem; }
 
         @keyframes shake {
@@ -292,88 +285,87 @@
         }
         .shake { animation: shake .3s ease; }
 
-        /* Navigasyon sağ */
-        .nav-right { display: flex; align-items: center; gap: 12px; }
+        .nav-right { display: flex; align-items: center; gap: 10px; }
 
         /* Step dots */
         #step-dots { display: flex; gap: 5px; align-items: center; }
         .sdot {
             width: 6px; height: 6px; border-radius: 50%;
-            background: var(--border-h); cursor: pointer; transition: all .2s;
+            background: var(--bg2); cursor: pointer; transition: all .2s;
         }
-        .sdot.active { background: var(--gold); transform: scale(1.4); }
-        .sdot.done   { background: rgba(200,168,75,.4); }
+        .sdot.active { background: var(--sage-mid); transform: scale(1.4); }
+        .sdot.done   { background: var(--sage); }
 
         #step-counter {
             font-size: .68rem; font-weight: 500; color: var(--text3);
-            font-family: 'JetBrains Mono', monospace; min-width: 50px;
+            font-family: 'JetBrains Mono', monospace; min-width: 48px;
         }
 
-        .nav-divider { width: 1px; height: 20px; background: var(--border); }
+        .nav-sep { width: 1px; height: 18px; background: var(--border); }
 
+        /* Butonlar — resimdeki pill buton tarzı */
         .nav-btn {
-            border: none; height: 34px; padding: 0 16px; border-radius: 34px;
+            border: none; height: 34px; padding: 0 18px; border-radius: 34px;
             font-family: inherit; font-size: .78rem; font-weight: 500;
-            cursor: pointer; transition: all .18s; display: flex; align-items: center; gap: 6px;
+            cursor: pointer; transition: all .18s;
+            display: flex; align-items: center; gap: 5px;
         }
-        #btn-prev {
-            background: var(--glass-h); color: var(--text2);
-            border: 1px solid var(--border);
-        }
-        #btn-prev:hover { background: var(--glass-b); color: var(--text); border-color: var(--border-h); }
 
-        #btn-next {
-            background: var(--gold); color: #1a1408; font-weight: 600;
-            box-shadow: 0 0 16px rgba(200,168,75,.2);
+        #btn-prev {
+            background: var(--bg2); color: var(--text2);
         }
-        #btn-next:hover { background: var(--gold2); box-shadow: 0 0 24px rgba(200,168,75,.35); }
+        #btn-prev:hover { background: var(--bg); color: var(--text); }
+
+        /* Resimdeki koyu pill buton */
+        #btn-next {
+            background: var(--pill-dark); color: #fff; font-weight: 600;
+        }
+        #btn-next:hover { background: #2e2e2c; }
         #btn-next:active { transform: scale(.97); }
 
         button:disabled { opacity: .28; cursor: not-allowed; pointer-events: none; }
 
-        /* ════════════════════════════════
+        /* ════════════════════
            TAMAMLANDI MODAL
-        ════════════════════════════════ */
+        ════════════════════ */
         #complete-screen {
             position: fixed; inset: 0; z-index: 1000;
-            background: rgba(0,0,0,.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(242,242,240,.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             display: none; align-items: center; justify-content: center;
         }
         #complete-screen.show { display: flex; }
 
         .modal {
-            background: var(--bg2); border: 1px solid var(--border-gold);
-            border-radius: 24px; padding: 40px 44px; text-align: center;
-            box-shadow: 0 24px 64px rgba(0,0,0,.6), 0 0 40px rgba(200,168,75,.08);
+            background: var(--white);
+            border-radius: 28px; padding: 40px 44px; text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,.1);
             max-width: 360px; width: 100%;
             animation: popIn .35s ease both;
         }
         .modal-icon { font-size: 2.8rem; margin-bottom: 14px; }
-        .modal h2 { font-size: 1.3rem; font-weight: 700; color: var(--gold); margin: 0 0 10px; }
+        .modal h2 { font-size: 1.3rem; font-weight: 700; color: var(--text); margin: 0 0 10px; }
         #complete-msg { font-size: .88rem; color: var(--text2); line-height: 1.65; margin: 0 0 24px; }
         .modal-btn {
-            background: var(--gold); color: #1a1408; border: none;
-            padding: 11px 28px; border-radius: 30px;
-            font-family: inherit; font-size: .85rem; font-weight: 700;
+            background: var(--pill-dark); color: #fff; border: none;
+            padding: 12px 28px; border-radius: 30px;
+            font-family: inherit; font-size: .85rem; font-weight: 600;
             cursor: pointer; transition: all .18s;
         }
-        .modal-btn:hover { background: var(--gold2); box-shadow: 0 0 20px rgba(200,168,75,.3); }
+        .modal-btn:hover { background: #2e2e2c; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.15); }
 
-        /* ════════════════════════════════
-           ANİMASYONLAR
-        ════════════════════════════════ */
+        /* ── ANİMASYONLAR ── */
         @keyframes fadeDown {
-            from { opacity: 0; transform: translateY(-12px); }
+            from { opacity: 0; transform: translateY(-10px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(10px); }
             to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes popIn {
-            from { opacity: 0; transform: scale(.88); }
+            from { opacity: 0; transform: scale(.9); }
             to   { opacity: 1; transform: scale(1); }
         }
 
@@ -381,7 +373,7 @@
         @media(max-width: 820px) {
             .sidebar { display: none; }
             .mid-row { flex-direction: column; }
-            .board-card { aspect-ratio: auto; width: 100%; max-height: 300px; }
+            .board-card { aspect-ratio: auto; width: 100%; max-height: 280px; }
         }
     </style>
 </head>
@@ -392,7 +384,7 @@
     <header>
         <div class="hdr-left">
             <a href="index.html" class="back-link">←</a>
-            <div class="hdr-divider"></div>
+            <div class="hdr-sep"></div>
             <div>
                 <span id="chapter-tag">Yükleniyor…</span>
                 <div id="lesson-title">Go Öğren</div>
@@ -415,8 +407,8 @@
 
         <!-- CONTENT -->
         <main class="content-area">
-
             <div class="mid-row">
+
                 <!-- TAHTA -->
                 <div class="board-card">
                     <canvas id="goban"></canvas>
@@ -426,6 +418,7 @@
                 <div class="info-card">
                     <div id="lesson-body"></div>
                 </div>
+
             </div>
 
             <!-- FOOTER -->
@@ -438,7 +431,7 @@
                 <div class="nav-right">
                     <div id="step-dots"></div>
                     <span id="step-counter">1 / 1</span>
-                    <div class="nav-divider"></div>
+                    <div class="nav-sep"></div>
                     <button id="btn-prev" class="nav-btn" onclick="prevStep()">← Geri</button>
                     <button id="btn-next" class="nav-btn" onclick="nextStep()">İleri →</button>
                 </div>
